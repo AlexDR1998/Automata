@@ -1,0 +1,16 @@
+======================================================
+This program uses cellular automata to generate images
+
+Enter	-- Generate animation from a new rule
+r 	-- Generate animation from current rule
+s 	-- Save current rule
+l	-- Load rule and generate animation
+n	-- List saved rules
+p	-- Modify current rule and generate animation
++,-,*	-- Element-wise arithmetic on 2 rules
+m 	-- Element-wise mean of 2 rules
+z	-- Zip 2 rules together
+q	-- Quit
+h	-- Help
+
+======================================================
