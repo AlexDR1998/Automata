@@ -5,6 +5,14 @@ import matplotlib.pyplot as plt
 import math
 from scipy import stats
 
+"""
+
+test space for trying numpy functions
+
+
+"""
+
+
 
 
 print(LA.eig(np.array([[1,2],[-3,1]]))[1].real)
