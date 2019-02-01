@@ -225,7 +225,7 @@ class Grid2D(object):
         for x in range(0,self.nsize):
             n = n + 4*(self.states-1)*self.states**(x+1)
 
-        #print(n+1)
+        print(n+1)
 
         self.rule = np.random.randint(self.states,size=(n+1))
         """

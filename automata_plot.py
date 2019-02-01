@@ -29,7 +29,7 @@ def main():
     global matrix
     global data
     global colour
-    colour = "gist_earth"#"magma"
+    colour = "magma"#"gist_earth"
     inp = "a"
     g = Grid2D(size,0.5,states,neighbours,iterations)
     counter = 277
