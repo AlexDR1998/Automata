@@ -3,6 +3,7 @@ from org import Grid
 #from interface import Interface as i 
 #from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 #import matplotlib.animation as animation
 #import matplotlib.cm as cm
 #import time
@@ -34,14 +35,39 @@ def main():
             print(f.read())
             f.close()
         if inp=="r":
+            g.initialise_random()
             g.run()
             plt.matshow(g.im_out(),cmap="nipy_spectral")
             plt.show()
+        if inp=="m":
+            ani_display()
+            #g.initialise_mutate(1)
+            #g.run()
+            #plt.matshow(g.im_out(),cmap="nipy_spectral")
+            #plt.show()
         if inp=="":
              
             g = Grid(size,0.5,states,neighbours,iterations)
+            g.initialise_random()
             g.run()
             plt.matshow(g.im_out(),cmap="nipy_spectral")
             plt.show()
             
+
+
+def ani_display(mode=0):
+
+
+    def update(i):
+        g.initialise_mutate(1)
+        g.run()
+        matrix.set_array(g.im_out())
+    g.initialise_mutate(1)
+    g.run()
+    fig, ax = plt.subplots()            
+    matrix = ax.matshow(g.im_out(),cmap="nipy_spectral")
+    #plt.colorbar(matrix)
+    ani = animation.FuncAnimation(fig,update,frames=100,interval=100)
+    plt.show()
+
 main()

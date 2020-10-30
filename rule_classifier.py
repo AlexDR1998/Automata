@@ -58,7 +58,7 @@ def main():
 		f = lambda x:np.diff(x,axis=0)
 		#print(trn_label[x])
 
-		data = f(f(f(f(g.im_out()))))
+		data = (f(g.im_out()))
 	    
 		res[x] = np.sum(abs(np.sum(data,axis=(1,2)))/(iterations*size**2))
 		#xs = np.arange(len(ys))

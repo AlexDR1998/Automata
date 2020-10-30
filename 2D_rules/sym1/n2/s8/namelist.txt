@@ -7,3 +7,6 @@ sr1
 clusters
 sr2
 glider4
+tubes
+slowdeath
+slowglider

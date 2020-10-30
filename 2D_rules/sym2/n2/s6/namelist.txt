@@ -1,0 +1,4 @@
+
+symmetric
+blobs
+strobe_fluid

@@ -18,7 +18,9 @@ Program to interface between user and Cellular automata code in org.py
 
 def main():
     global states
+    global symm
     states = int(input("Enter number of states: "))
+    symm = int(input("Enter neighbourhood type (0,1 or 2): "))
     neighbours = int(input("Enter size of cell neighbourhood: "))
     global size
     size = int(input("Enter size of grid: "))
@@ -29,9 +31,11 @@ def main():
     global matrix
     global data
     global colour
-    colour = "magma"#"gist_earth"
+    colour = "gist_earth"
     inp = "a"
-    g = Grid2D(size,0.5,states,neighbours,iterations)
+    mu=0.7
+    sig=0.3
+    g = Grid2D(size,0.5,states,neighbours,iterations,symm)
     counter = 277
     while inp!="q":
         counter = counter+1
@@ -47,12 +51,41 @@ def main():
             ani_display()            
         if inp=="":
             #Generate new rule and run          
-            g.rule_gen()
+            g.rule_gen(mu,sig)
             g.run()
             ani_display()
+        if inp=="fft":
+            g.fft()
+            ani_display(7)
+
+        if inp=="gol":
+            g.rule = np.array([0,0,0,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0])
+            g.run()
+            ani_display()
+        if inp=="info":
+            g.print_info()
+
+        if inp=="print":
+            g.print_rule()
+
+        if inp=="dmat":
+            plt.matshow((g.density_matrix()))
+            plt.ylabel("Inputs")
+            plt.xlabel("Outputs")
+            plt.show()
+        if inp=="cont":
+            g.run(False)
+            ani_display()
+        if inp=="ms":
+            mu = float(input("Enter mu: "))
+            sig = float(input("Enter sigma: "))
+            g.rule_gen(mu,sig)
+            g.run()
+            ani_display()
+
         if inp=="t":
             #generate new rule and tranpose output
-            g.rule_gen()
+            g.rule_gen(mu,sig)
             g.run()
             ani_display(mode=4)
         
@@ -67,24 +100,32 @@ def main():
             g.run()
             ani_display(mode=2)
 
+        if inp=="diff":
+            #double derivative
+            g.run()
+            ani_display(mode=5)
+
         if inp=="rt":
             #Rerun same rule, transposed
             g.run()
             ani_display(mode=4)
+        if inp=="lyap":
+            g.lyap()
+            ani_display()
         if inp=="s": 
             #save current rule        
             filename = str(raw_input("Enter rule name: "))
             g.rule_save(filename)
         if inp=="l":
             #load from saved rules
-            read_saved_rules(neighbours,states)
+            read_saved_rules(neighbours,states,symm)
             filename = str(raw_input("Enter rule name: "))
             g.rule_load(filename)
             g.run()
             ani_display()
         if inp=="n":
             #display saved rules
-            read_saved_rules(neighbours,states)
+            read_saved_rules(neighbours,states,symm)
         if inp=="p":
             #permute current rule and rerun           
             g.rule_perm()
@@ -124,22 +165,35 @@ def main():
             g.change_start_type()
         if inp=="e":
             #Plot entropy of CA simulation
-            #g.run()
-            #ani_display(mode=5)
-            entropy_plot()
+
+            en = g.entropy()
+            plt.plot(en)
+            plt.show()
         if inp=="2d":
             #Project output onto 2d surface
             axis = int(raw_input("Enter axis: "))
             snapshot(axis)
-
-
+        if inp=="food":
+            m = int(raw_input("Enter food mode: "))
+            g.food_mode(m)
+            g.run()
+            ani_display()
+        if inp=="mutate":
+            am = float(raw_input("Enter mutation amount (0-1): "))
+            g.run_mutate(am)
+            ani_display()
+            best = int(raw_input("Select best rule (1-4): "))
+            g.choose_offspring(best)
+        if inp=="sample":
+            n=int(raw_input("Enter sample rate: "))
+            ani_display(mode=6,n=n)
         #if inp!="q":
         #    name = "rule_"+str(counter)
         #    t = str(raw_input("Enter rule type(i,d,n,s): "))
         #    g.store(t,name)
 
 
-def ani_display(mode=0):
+def ani_display(mode=0,n=1):
     if mode==0:
         data = g.im_out()
     elif mode==1:
@@ -152,8 +206,11 @@ def ani_display(mode=0):
         data = np.moveaxis(g.im_out(),0,1)
     
     elif mode==5:
-        data = np.diff(np.diff(g.im_out(),axis=0),axis=0)
-        
+        data = np.abs(np.diff(np.diff(g.im_out(),axis=0),axis=0))
+    elif mode==6:
+        data = g.im_out()[::n]
+    elif mode==7:
+        data = g.fft_data
 
 
     def update(i):
@@ -190,6 +247,7 @@ def entropy_plot():
     #print(xs)
 
 
+
 def smooth(d,am):
     k = np.ones((am,am,am))
     k = k/np.sum(k)
@@ -198,11 +256,11 @@ def smooth(d,am):
 
 
 
-def read_saved_rules(n,s):
+def read_saved_rules(n,s,sym):
     f = open("text_resources/name_header.txt","r")
     print(f.read())
     f.close()
-    f = open('2D_rules/n'+str(n)+'/s'+str(s)+'/namelist.txt','r')
+    f = open('2D_rules/sym'+str(sym)+'/n'+str(n)+'/s'+str(s)+'/namelist.txt','r')
     print(f.read())
     f.close()
     f = open("text_resources/name_foot.txt","r")

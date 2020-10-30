@@ -2,13 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 from scipy import signal
-
+import sys
 
 
 """
     1 dimensional cellular automata, with multiple colour options
 
 """
+
 
 
 class Grid(object):
@@ -34,6 +35,7 @@ class Grid(object):
 
         self.previous_state = np.zeros(size)
         self.next_state = np.zeros(size)
+        self.init_state = np.zeros(size)
         #store data here for image output
         self.image = np.zeros((iterations,size))
         self.max_iters = iterations
@@ -71,18 +73,25 @@ class Grid(object):
 
         self.next_state[pos]=self.rule[int(index)]
 
+    def initialise_random(self):
+        self.current_state = np.random.randint(self.states,size=self.size)
+        for x in range(self.size):
+            if np.random.rand()>self.init_density:
+                self.current_state[x]=0
+        self.init_state = self.current_state[:]
+
+    def initialise_mutate(self,n):
+        r = np.random.randint(0,self.size,n)
+        self.init_state[r] = np.random.randint(0,self.states,n)
+
     def run(self):
 
         """
         runs update_cell on every cell in a given state, then updates the state,
         then repeats. Saves data to self.image for output
         """
-        self.current_state = np.random.randint(self.states,size=self.size)
-
-        for x in range(self.size):
-            if np.random.rand()>self.init_density:
-                self.current_state[x]=0
-
+        
+        self.current_state = self.init_state[:]
         for i in range(self.max_iters):
             for x in range(self.size):
                 self.update_cell(x)
@@ -110,7 +119,7 @@ class Grid2D(object):
            [3]
 
     """
-    def __init__(self,size,density,states,nsize,iterations):
+    def __init__(self,size,density,states,nsize,iterations,symmetries=1):
         
         #Size of square grid
         self.size = size
@@ -118,6 +127,8 @@ class Grid2D(object):
         self.init_density = density
         #Number of states
         self.states = states
+        #Define density matrix
+        self.d = np.zeros((self.states,self.states))
         #Size of neighbourhood
         #        [3]
         #     [2][1][2]
@@ -126,30 +137,90 @@ class Grid2D(object):
         #        [3]
         #
         self.nsize = nsize
+        self.symmetries = symmetries
         s = self.states
-        if self.nsize==2:
-            self.k = np.array([[s,s**2,s],[s**2,1,s**2],[s,s**2,s]])
-        elif self.nsize==3:
-            self.k = np.array([[0,s,s**2,s,0],[s,s**2,s**3,s**2,s],
-                [s**2,s**3,1,s**3,s**2],
-                [s,s**2,s**3,s**2,s],[0,s,s**2,s,0]])
+        if symmetries==1:
+            self.n_struct=np.array([4,4,4])
+            _k = 1+(s-1)*self.n_struct
+            if self.nsize==2:
+                self.k = np.array([[    1,      _k[1],1   ],
+                                   [_k[1],_k[0]*_k[1],_k[1]],
+                                   [    1,      _k[1],1   ]])
+            elif self.nsize==3:
+                self.k = np.array([[    0,          1,            _k[2],          1,0   ],
+                                   [    1,      _k[2],      _k[2]*_k[1],      _k[2],1   ],
+                                   [_k[2],_k[2]*_k[1],_k[2]*_k[1]*_k[0],_k[2]*_k[1],_k[2]],
+                                   [    1,      _k[2],      _k[2]*_k[1],      _k[2],1   ],
+                                   [    0,          1,            _k[2],          1,0   ]])
 
-        elif self.nsize==1:
-            self.k = np.array([[0,s,0],[s,1,s],[0,s,0]])
+            elif self.nsize==1:
+                self.k = np.array([[0,    1,0],
+                                   [1,_k[0],1],
+                                   [0,    1,0]])
+        elif symmetries==2:
+            self.n_struct=np.array([8,16])
+            _k = 1+(s-1)*self.n_struct
+            if self.nsize==1:
+                self.k=np.array([[1,    1,1],
+                                 [1,_k[0],1],
+                                 [1,    1,1]])
+            elif self.nsize==2:
+                self.k=np.array([[1,    1,          1,    1,1],
+                                 [1,_k[1],      _k[1],_k[1],1],
+                                 [1,_k[1],_k[0]*_k[1],_k[1],1],
+                                 [1,_k[1],      _k[1],_k[1],1],
+                                 [1,    1,          1,    1,1]])
+        elif symmetries==0:
+            if self.nsize==1:
+                self.n_struct=np.array([8,0])
+                _k = 1+(s-1)*self.n_struct
+                self.k=np.array([[1,1,1],
+                                 [1,_k[0],1],
+                                 [1,1,1]])
+            elif self.nsize==2:
+                self.n_struct=np.array([20,0])
+                _k = 1+(s-1)*self.n_struct
+                self.k=np.array([[0,1,1,1,0],
+                                 [1,1,1,1,1],
+                                 [1,1,_k[0],1,1],
+                                 [1,1,1,1,1],
+                                 [0,1,1,1,0]])
+
+            elif self.nsize==3:
+                self.n_struct=np.array([24,0])
+                _k = 1+(s-1)*self.n_struct
+                self.k=np.array([[1,1,1,1,1],
+                                 [1,1,1,1,1],
+                                 [1,1,_k[0],1,1],
+                                 [1,1,1,1,1],
+                                 [1,1,1,1,1]])
         #How many iterations to run the code for
         self.max_iters = iterations
         #Call rule generator
         self.rule_gen()
-        #Define variable for storing next state
+        #Define array for storing next state
         self.next_state = np.zeros((size,size))
         #Store all data for passing to visualiser program
         self.image = np.zeros((iterations,size,size))
         self.starttype = 0
+        #food modes force small sections of the grid to remain at the highest cell value
+        self.food = 0
 
 
 
+    def print_info(self):
+        #Prints info about current rule parameters
+        print("Number of states: "+str(self.states))
+        print("Rule length: "+str(len(self.rule)))
+        print("Number of possible rules (log2): "+str(np.log2(float(self.states))*float(len(self.rule))))
+
+    def print_rule(self):
+        print(self.rule)
     def change_start_type(self):
         self.starttype = 1 - self.starttype
+
+    def food_mode(self,mode):
+        self.food = mode
 
     def update_cell(self,xpos,ypos):
         #---Disused
@@ -177,6 +248,7 @@ class Grid2D(object):
     def init_grid(self):
         if self.starttype==0:
             self.current_state = np.random.randint(self.states,size=(self.size,self.size))
+            self.init_state = np.copy(self.current_state)
         elif self.starttype==1:
             condition = np.mean(((self.size/2.0-np.mgrid[0:self.size:1, 0:self.size:1])**2),axis=0)<self.size/2
             #print(condition)
@@ -184,22 +256,136 @@ class Grid2D(object):
             #print(r)
             z = np.zeros((self.size,self.size)).astype(int)
             self.current_state = np.where(condition,r,z)
+            self.init_state = np.copy(self.current_state)
             #print(self.current_state)
 
-    def run(self):
-        #initialises random starting state
-        
+    def run_mutate(self,am=0.1):
+        #Runs 4 rules in parallel, 1 on each corner.
+        #Rules are mutated from initial rule
         self.init_grid()
+        length = len(self.rule)
+
+        rule1 = np.zeros(length)
+        rule2 = np.zeros(length)
+        rule3 = np.zeros(length)
+        rule4 = np.zeros(length)
+        #print(len(rule1))
+        rule1 = np.array(self.rule,copy=True)
+        rule2 = np.array(self.rule,copy=True)
+        rule3 = np.array(self.rule,copy=True)
+        rule4 = np.array(self.rule,copy=True)
+
+
+        #print(len(rule1))
+        #print(self.rule.shape)
+        #print(self.rule)
+        for x in range(0,int(length/4)):
+            #print(x)
+            r = np.random.rand()
+            if r>1-am:
+                rule1[x]=(rule1[x]+1)%self.states
+            elif r<am:
+                rule1[x]=(rule1[x]-1)%self.states
+        
+        for x in range(int(length/4),int(length/2)):
+            r = np.random.rand()
+            if r>1-am:
+                rule2[x]=(rule2[x]+1)%self.states
+            elif r<am:
+                rule2[x]=(rule2[x]-1)%self.states
+        
+        for x in range(int(length/2),int(3*length/4)):
+            r = np.random.rand()
+            rule3[x]=0
+            if r>1-am:
+                rule3[x]=(rule3[x]+1)%self.states
+            elif r<am:
+                rule3[x]=(rule3[x]-1)%self.states
+        
+        for x in range(int(3*length/4),int(length)):
+            r = np.random.rand()
+            #rule4[x] = self.states-1
+            if r>1-am:
+                rule4[x]=(rule4[x]+1)%self.states
+            elif r<am:
+                rule4[x]=(rule4[x]-1)%self.states
+
+        #print(self.rule-rule1)
+        #print(self.rule-rule2)
+        #print(self.rule-rule3)
+        #print(self.rule-rule4)
 
 
         p = len(self.rule)
-
+        zs = np.zeros((self.size/2,self.size/2))
         for i in range(self.max_iters):
             self.next_state=signal.convolve2d(self.current_state,self.k,boundary='wrap',mode='same')
+            v1 = np.vectorize(lambda y:rule1[y%p])
+            v2 = np.vectorize(lambda y:rule2[y%p])
+            v3 = np.vectorize(lambda y:rule3[y%p])
+            v4 = np.vectorize(lambda y:rule4[y%p])
 
-            v = np.vectorize(lambda y:self.rule[y%p])
-            self.current_state = v(self.next_state)
+
+            self.current_state[0:self.size/2,0:self.size/2] = v1(self.next_state[0:self.size/2,0:self.size/2])
+            self.current_state[0:self.size/2,self.size/2:self.size] = v2(self.next_state[0:self.size/2,self.size/2:self.size])
+            self.current_state[self.size/2:self.size,0:self.size/2] = v3(self.next_state[self.size/2:self.size,0:self.size/2])
+            self.current_state[self.size/2:self.size,self.size/2:self.size] = v4(self.next_state[self.size/2:self.size,self.size/2:self.size])
+            self.current_state[:][self.size/2]=0
+            self.current_state[self.size/2][:]=0
+
             self.image[i] = self.current_state
+
+        self.child1 = rule1
+        self.child2 = rule2
+        self.child3 = rule3
+        self.child4 = rule4
+
+    def choose_offspring(self,best):
+
+        if best==1:
+            self.rule=np.array(self.child1,copy=True)
+        elif best==2:
+            self.rule=np.array(self.child2,copy=True)
+        elif best==3:
+            self.rule=np.array(self.child3,copy=True)
+        elif best==4:
+            self.rule=np.array(self.child4,copy=True)
+
+    def run(self,random_init=True,compute_t_matrix=False):
+        #initialises random starting state
+        if random_init:
+            self.init_grid()
+        self.d = np.zeros((self.states,self.states))
+        s = self.states
+        ss = np.arange(s)
+        p = len(self.rule)
+
+        for i in range(self.max_iters):
+            #Convolve to calculate next global state
+            v = np.vectorize(lambda y:self.rule[y%p])
+            self.next_state=v(signal.convolve2d(self.current_state,self.k,boundary='wrap',mode='same'))
+            
+            #Update transition density matrix - gets slow for large number of states
+            if compute_t_matrix:
+                g_i = np.tile(self.current_state,(s,1,1))
+                g_j = np.tile(self.next_state,(s,1,1))
+                g_i_eq = np.equal(g_i,ss[:,None,None]).astype(int)
+                g_j_eq = np.equal(g_j,ss[:,None,None]).astype(int)
+                self.d+=np.einsum('ixy,jxy->ij',g_i_eq,g_j_eq)
+            
+
+            #for a in range(self.states):
+            #    for b in range(self.states):
+            #        self.d[a,b]+=np.count_nonzero(np.logical_and(self.current_state==a,self.next_state==b))
+            
+            #Set current state to new state
+            self.current_state = self.next_state
+            if self.food==1:
+                self.current_state[:,0] = self.states-1
+            if self.food==2:
+                self.current_state[(self.size/2-10):(self.size/2+10),(self.size/2-10):(self.size/2+10)] = self.states-1
+            self.image[i] = self.current_state
+        #print(self.iterations)
         """
         for x in range(self.size):
             for y in range(self.size):
@@ -208,7 +394,7 @@ class Grid2D(object):
                 if np.random.rand()>self.init_density:
                     self.current_state[x,y]=0
         for i in range(self.max_iters):
-            for x in range(self.size):
+            for x in range(self.size):african
                 for y in range(self.size):
 
                     self.update_cell(x,y)
@@ -219,15 +405,78 @@ class Grid2D(object):
     def im_out(self):
         return self.image
 
-    def rule_gen(self):
-        n = self.states-1
+
+    def density_matrix(self,random_init=True):
+
+        self.run(random_init,True)
+        self.d = (self.d.T/np.sum(self.d,axis=1)).T 
+        #print(np.linalg.eig(self.d)[0])
+        #print(self.d)
+        #self.d/=np.sum(self.d,axis=1)
+        return self.d#/(l*10)
+
+
+    def fft(self):
+        print(np.mean(self.image,axis=(1,2)).shape)
+        self.fft_data = np.abs(np.fft.fftshift(np.fft.fft2(self.image-np.mean(self.image,axis=(1,2))[:,None,None])))
+
+    def lyap(self,N):
+        #Run N simulations that differ by 1 cell in initial configuration from a given start state. Returns difference
+        self.init_grid()
+        #print("_"*N)
+        lyap_data = np.zeros((N+2,self.max_iters))
+        for i in range(N):
+            sys.stdout.write("#")
+            sys.stdout.flush()
+            x = np.random.randint(self.size)
+            y = np.random.randint(self.size)
+            
+            #for i in range(1):
+            #print(np.sum((self.current_state-grid_2)**2))
+            
+            self.current_state = np.copy(self.init_state)
+            self.run(False)
+            data1 = np.copy(self.image)
+
+            grid_2 = np.copy(self.init_state)
+            grid_2[x,y]= (grid_2[x,y]+ np.random.randint(1,self.states))%self.states
+            
+            self.current_state = np.copy(grid_2)
+            self.run(False)
+            data2 = np.copy(self.image)
+            
+            lyap_data[i+2] = np.sum((data1-data2)**2,axis=(1,2))/(self.size**2) 
+        #plt.plot()
+        #plt.show()
+        sys.stdout.write("|")
+        sys.stdout.flush()
+        self.image = data1-data2
+        return lyap_data
+
+    def entropy(self):
+        #Calculate information entropy at each timestep
+        p = np.zeros((self.states,self.max_iters))
+        print(self.image.shape)
+        ss = np.arange(self.states)
+        s = np.equal(np.tile(self.image,(self.states,1,1,1)),ss[:,None,None,None])
+        p = np.sum(s,axis=(2,3))/float(self.size*self.size)
+        en = -np.sum(p*np.log(p),axis=0)
+        return en
+        #print(en)
+        #print(s.shape)
+
+    def rule_gen(self,mu=0.5,sig=0.2):
+        #n = self.states-1
         #print(self.nsize)
+        #for x in range(0,self.nsize):
+        #    n = n + self.n_struct[x]*(self.states-1)*self.states**(x+1)
+        n = self.states
         for x in range(0,self.nsize):
-            n = n + 4*(self.states-1)*self.states**(x+1)
+            n*=(1+(self.states-1)*self.n_struct[x])
+        #print(n+1)
 
-        print(n+1)
 
-        self.rule = np.random.randint(self.states,size=(n+1))
+        self.rule = np.random.randint(self.states,size=n)
         """
         self.rule = np.random.poisson(1,size=(n+1))
         self.rule = (self.rule/float(np.max(self.rule))*self.states).astype(int)
@@ -236,11 +485,11 @@ class Grid2D(object):
         self.rule[0]=0
         #print(self.rule)
         """
-        xs = np.linspace(0,n,n+1)
-        g = np.vectorize(lambda y:gaussian(y,xs[int(np.floor(n/2))],(n/5)))
+        xs = np.linspace(0,n,n)
+        g = np.vectorize(lambda y:gaussian(y,xs[int(np.floor(n*mu))],(n*sig)))
         gxs = g(xs)
-        rs = np.random.rand(n+1)
-        zs = np.zeros(n+1)
+        rs = np.random.rand(n)
+        zs = np.zeros(n)
         #print(len(gxs))
         #print(len(rs))
         #print(len(zs))
@@ -262,13 +511,13 @@ class Grid2D(object):
         """
         method to save a rule to csv format
         """
-        nlist = open('2D_rules/n'+str(self.nsize)+'/s'+str(self.states)+'/namelist.txt','a')
+        nlist = open('2D_rules/sym'+str(self.symmetries)+'/n'+str(self.nsize)+'/s'+str(self.states)+'/namelist.txt','a')
         nlist.write('\n'+name)
         nlist.close()
 
 
 
-        f = open('2D_rules/n'+str(self.nsize)+'/s'+str(self.states)+'/'+name+'.csv','w+')
+        f = open('2D_rules/sym'+str(self.symmetries)+'/n'+str(self.nsize)+'/s'+str(self.states)+'/'+name+'.csv','w+')
 
         np.save(f,self.rule)
         f.close()
@@ -279,7 +528,7 @@ class Grid2D(object):
         loads a previously saved rule
         """
 
-        f = open('2D_rules/n'+str(self.nsize)+'/s'+str(self.states)+'/'+name+'.csv','r')#
+        f = open('2D_rules/sym'+str(self.symmetries)+'/n'+str(self.nsize)+'/s'+str(self.states)+'/'+name+'.csv','r')#
         self.rule = np.load(f)
         f.close()
 
