@@ -31,7 +31,7 @@ def main():
     global matrix
     global data
     global colour
-    colour = "gist_earth"
+    colour = "magma"
     inp = "a"
     mu=0.7
     sig=0.3
@@ -39,7 +39,8 @@ def main():
     counter = 277
     while inp!="q":
         counter = counter+1
-        inp = str(raw_input(":")) 
+        #inp = str(input(":")) 
+        inp = str(input(":"))
         if inp=="h":
             #Print help.txt to terminal
             f = open("text_resources/help.txt","r")
@@ -55,9 +56,15 @@ def main():
             g.run()
             ani_display()
         if inp=="fft":
-            g.fft()
+            print(g.fft())
             ani_display(7)
+            ani_display()
 
+
+        if inp=="metric":
+            a = g.get_metrics(4)
+            print(a)
+            print(a.shape)
         if inp=="gol":
             g.rule = np.array([0,0,0,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0])
             g.run()
@@ -114,12 +121,12 @@ def main():
             ani_display()
         if inp=="s": 
             #save current rule        
-            filename = str(raw_input("Enter rule name: "))
+            filename = str(input("Enter rule name: "))
             g.rule_save(filename)
         if inp=="l":
             #load from saved rules
             read_saved_rules(neighbours,states,symm)
-            filename = str(raw_input("Enter rule name: "))
+            filename = str(input("Enter rule name: "))
             g.rule_load(filename)
             g.run()
             ani_display()
@@ -133,13 +140,13 @@ def main():
             ani_display()
         if inp=="d":
             #Change initial state density  
-            d = float(raw_input("Enter initial density: "))
+            d = float(input("Enter initial density: "))
             g = Grid2D(size,d,states,neighbours,iterations)
         if (inp=="+" or inp=="*" or inp=="-" or inp=="m" or inp=="z" or inp=="c"):
             #Combine 2 rules in some way
             read_saved_rules(neighbours,states)
-            rule1 = str(raw_input("Enter first rule: "))
-            rule2 = str(raw_input("Enter second rule: "))
+            rule1 = str(input("Enter first rule: "))
+            rule2 = str(input("Enter second rule: "))
             g.rule_comb(rule1,rule2,inp)
             g.run()
             ani_display()
@@ -150,13 +157,13 @@ def main():
             ani_display()
         if inp=="w":
             #Smooth rule
-            am = int(raw_input("Enter smoothing amount: "))
+            am = int(input("Enter smoothing amount: "))
             g.rule_smooth(am)
             g.run()
             ani_display()
         if inp=="f":
             #fold rule
-            am = int(raw_input("Enter folding amount: "))
+            am = int(input("Enter folding amount: "))
             g.rule_fold(am)
             g.run()
             ani_display()
@@ -164,32 +171,38 @@ def main():
             #change initial conditon type
             g.change_start_type()
         if inp=="e":
-            #Plot entropy of CA simulation
-
-            en = g.entropy()
-            plt.plot(en)
-            plt.show()
+            #return rule entropy
+            print(g.rule_entropy())
+            #en = g.entropy()
+            #plt.plot(en)
+            #plt.show()
         if inp=="2d":
             #Project output onto 2d surface
-            axis = int(raw_input("Enter axis: "))
+            axis = int(input("Enter axis: "))
             snapshot(axis)
-        if inp=="food":
-            m = int(raw_input("Enter food mode: "))
-            g.food_mode(m)
-            g.run()
-            ani_display()
+
+        if inp=="slice":
+            axis = int(input("Enter axis: "))
+            if axis==0:
+                plt.matshow(g.im_out()[iterations//2],cmap=colour)
+            if axis==1:
+                plt.matshow(g.im_out()[:,size//2],cmap=colour)
+            if axis==2:
+                plt.matshow(g.im_out()[:,:,size//2],cmap=colour)
+            plt.show()
+
         if inp=="mutate":
-            am = float(raw_input("Enter mutation amount (0-1): "))
+            am = float(input("Enter mutation amount (0-1): "))
             g.run_mutate(am)
             ani_display()
-            best = int(raw_input("Select best rule (1-4): "))
+            best = int(input("Select best rule (1-4): "))
             g.choose_offspring(best)
         if inp=="sample":
-            n=int(raw_input("Enter sample rate: "))
+            n=int(input("Enter sample rate: "))
             ani_display(mode=6,n=n)
         #if inp!="q":
         #    name = "rule_"+str(counter)
-        #    t = str(raw_input("Enter rule type(i,d,n,s): "))
+        #    t = str(input("Enter rule type(i,d,n,s): "))
         #    g.store(t,name)
 
 
