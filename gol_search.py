@@ -67,30 +67,14 @@ def main():
 	#print(data)
 	#np.save("random_walk_gol_rules",data)
 	#data = smooth_perm_explore(32)
-
-	r1 = np.load("8state_rules_sp_32_1.npy")
-	r2 = np.load("8state_rules_sp_32_2.npy")
-	r3 = np.load("8state_rules_sp_32_3.npy")
-	r4 = np.load("8state_rules_sp_32_4.npy")
-	r5 = np.load("8state_rules_sp_32_5.npy")
-	r6 = np.load("8state_rules_sp_32_6.npy")
-	r7 = np.load("8state_rules_sp_32_7.npy")
-	r8 = np.load("8state_rules_sp_32_8.npy")
-	r9 = np.load("8state_rules_sp_32_9.npy")
-	r10 = np.load("8state_rules_sp_32_10.npy")
-	r11 = np.load("8state_rules_sp_32_11.npy")
-	r12 = np.load("8state_rules_sp_32_12.npy")
-	r13 = np.load("8state_rules_sp_32_13.npy")
-	r14 = np.load("8state_rules_sp_32_14.npy")
-	r15 = np.load("8state_rules_sp_32_15.npy")
-	r16 = np.load("8state_rules_sp_32_16.npy")
+	
 
 
-	rules = np.vstack((r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16))
-	np.save("8state_rules_sp_combined",rules)
+	
+	rules = np.load("8state_rules_sp_combined.npy")
 	#print(rules.shape)
 	#print(rules[1])
-	generate_observables(2,rules[:10])
+	generate_observables(8,rules)
 	#np.save("8state_rules_sp_32_16",data)
 	#plot_observables(15,13)
 	"""
