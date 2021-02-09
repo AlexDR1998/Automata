@@ -6,9 +6,9 @@ from scipy import signal
 from scipy import ndimage
 import sys
 #from sklearn import neighbors
-import h5py
-import tensorflow as tf 
-from tensorflow import keras
+#import h5py
+#import tensorflow as tf 
+#from tensorflow import keras
 
 
 """
@@ -825,6 +825,8 @@ class Grid2D(object):
 
 
 
+    """ Commented out because cplab doesn't have tensorflow
+
     def predict_interesting(self,N=1):
         #Runs get_metrics on current rule, then feeds output to trained neural network
         model = tf.keras.models.load_model('interesting_predictor.h5',compile=False)
@@ -832,6 +834,8 @@ class Grid2D(object):
         metrics = metrics.reshape((1,metrics.shape[0]))
         print(metrics)
         return model.predict(metrics)
+    """
+
 
 
 #--- Rule generation, manipulation, saving and loading
