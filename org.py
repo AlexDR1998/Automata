@@ -5,8 +5,10 @@ import scipy as sp
 from scipy import signal
 from scipy import ndimage
 import sys
-from sklearn import neighbors
-
+#from sklearn import neighbors
+import h5py
+import tensorflow as tf 
+from tensorflow import keras
 
 
 """
@@ -391,21 +393,7 @@ class Grid2D(object):
                 self.current_state[(self.size/2-10):(self.size/2+10),(self.size/2-10):(self.size/2+10)] = self.states-1
             self.image[i] = self.current_state
         #print(self.iterations)
-        """
-        for x in range(self.size):
-            for y in range(self.size):
-                #if ((x-self.size/2)**2+(y-self.size/2)**2)>32:
-                #    self.current_state[x,y]=0
-                if np.random.rand()>self.init_density:
-                    self.current_state[x,y]=0
-        for i in range(self.max_iters):
-            for x in range(self.size):african
-                for y in range(self.size):
-
-                    self.update_cell(x,y)
-            self.current_state = self.next_state
-            self.image[i] = self.current_state
-        """   
+  
 
     def im_out(self):
         return self.image
@@ -768,6 +756,7 @@ class Grid2D(object):
     def get_metrics(self,N):
         #Calculates and returns all the useful metrics for a rule (rule entropy, variation of simulation entropy, divergence powerlaw)
         #N denotes number of repeated simulations to average over
+
         #sys.stdout.write("||")
         #sys.stdout.flush()
         #---  Divergence
@@ -810,6 +799,12 @@ class Grid2D(object):
 
 
 
+
+        #--- Transition matrix
+
+        mat = self.density_matrix()
+
+
         metrics = np.array([l_params[0],l_params[1],l_params[2],
                             e_smooth_var,e_mean,e_var,
                             r_entropy,
@@ -821,7 +816,7 @@ class Grid2D(object):
 
         #Sometimes std for small number of states makes NaN - set these to 0
         metrics[np.isnan(metrics)]=0
-        return metrics
+        return metrics,mat
 
 
         #plt.plot(l_data)
@@ -829,6 +824,17 @@ class Grid2D(object):
         #plt.show()
 
 
+
+    def predict_interesting(self,N=1):
+        #Runs get_metrics on current rule, then feeds output to trained neural network
+        model = tf.keras.models.load_model('interesting_predictor.h5',compile=False)
+        metrics = self.get_metrics(N)
+        metrics = metrics.reshape((1,metrics.shape[0]))
+        print(metrics)
+        return model.predict(metrics)
+
+
+#--- Rule generation, manipulation, saving and loading
 
     def rule_gen(self,mu=0.5,sig=0.25,mode=0):
         #n = self.states-1
@@ -873,13 +879,6 @@ class Grid2D(object):
 
         np.save(f,self.rule)
 
-
-
-
-
-
-
-#--- Rule manipulation
 
 
     def rule_load(self,name):

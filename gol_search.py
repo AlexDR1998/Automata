@@ -26,7 +26,7 @@ def main():
 	np.seterr("ignore")
 	global states
 	global symm
-	states = 8
+	states = 4
 	symm = 2
 	neighbours = 1
 	global size
@@ -42,22 +42,9 @@ def main():
 	#mu=0.5
 	#sig=0.2
 	g = Grid2D(size,0.5,states,neighbours,iterations,symm)
-	"""
-	
-	gol_rule = np.array([0,0,0,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0]) 
-	g.rule = gol_rule
-	
-	class_near_gol = np.array([3,3,3,1,4,4,4,4,4,4,4,1,2,4,3,4,4,4,4])
-	#g.run()
-	#plt.plot(g.lyap())
-	rules = np.tile(gol_rule,(19,1))
-	I = np.eye(19)[:,:18]
-	print(I)
-	#print((rules-I)%2)
-	rules = ((rules-I)%2).astype(int)
-	print(rules)
-	lyap_evaluate(class_near_gol,rules,4)
-	"""
+
+
+
 	#N=16
 	#data = perm_explore(128)
 	#data = hamming_explore(128,2)
@@ -66,16 +53,76 @@ def main():
 	#data = random_walk_explore(128)
 	#print(data)
 	#np.save("random_walk_gol_rules",data)
+	
+
+	
 	#data = smooth_perm_explore(32)
+	#np.save("4state_rules_sp_32_16",data)
+	
+
+	r1 = np.load("4state_rules_sp_32_1.npy")
+	r2 = np.load("4state_rules_sp_32_2.npy")
+	r3 = np.load("4state_rules_sp_32_3.npy")
+	r4 = np.load("4state_rules_sp_32_4.npy")
+	r5 = np.load("4state_rules_sp_32_5.npy")
+	r6 = np.load("4state_rules_sp_32_6.npy")
+	r7 = np.load("4state_rules_sp_32_7.npy")
+	r8 = np.load("4state_rules_sp_32_8.npy")
+	r9 = np.load("4state_rules_sp_32_9.npy")
+	r10 = np.load("4state_rules_sp_32_10.npy")
+	r11 = np.load("4state_rules_sp_32_11.npy")
+	r12 = np.load("4state_rules_sp_32_12.npy")
+	r13 = np.load("4state_rules_sp_32_13.npy")
+	r14 = np.load("4state_rules_sp_32_14.npy")
+	r15 = np.load("4state_rules_sp_32_15.npy")
+	r16 = np.load("4state_rules_sp_32_16.npy")
+
+	rules = np.vstack((r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16))
+	print(rules.shape)
+	np.save("4state_rules_sp_combined",rules)
+
+	#data = np.load("8state_ml_data.npy")
+	#print(data.shape)
+
+
+
+
+
+	"""	
+	rules = np.load("Data/8state_rules_sp_combined.npy")
+
+	g.rule = rules[0,2:]
+	states = g.states
+	print(states)
+
+	R = rules.shape[0]
+	print("_"*R)
+	
+	mats = np.zeros((R,states,states))
+	for i in range(R):
+		g.rule = rules[i,2:]
+	
+		mats[i] = g.density_matrix()
+		sys.stdout.write("#")
+		sys.stdout.flush()
+
+	#np.save(str(states)+"state_ml_data.npy",observables)
+	np.save(str(states)+"state_transition_matrices.npy",mats)
+	
+	#observables = np.load("2state_ml_data.npy")
+	print(observables[0])
+	print(observables.shape)
+	"""
 	
 
 
-	
-	rules = np.load("8state_rules_sp_combined.npy")
+
+
+
+
 	#print(rules.shape)
 	#print(rules[1])
-	generate_observables(8,rules)
-	#np.save("8state_rules_sp_32_16",data)
+	#generate_observables(8,rules)
 	#plot_observables(15,13)
 	"""
 	g.rule_gen()
@@ -170,20 +217,51 @@ def old_load():
 
 
 
-def generate_observables(N,rules):
+
+
+def generate_observables_unlabelled(N,rules):
+	g.rule = rules[0]
+	states = g.states
+
+
+	R = rules.shape[0]
+	print("_"*R)
+	observables = np.zeros((R,16))
+	mats = np.zeros((R,states,states))
+	for i in range(R):
+		g.rule = rules[i]
+		observables[i],mats[i]= g.get_metrics(N)
+		sys.stdout.write("#")
+		sys.stdout.flush()
+
+	np.save(str(states)+"state_unlabelled_observables.npy",observables)
+	np.save(str(states)+"state_unlabelled_transition_matrices.npy")
 	
+	#observables = np.load("2state_ml_data.npy")
+	print(observables[0])
+	print(observables.shape)
+
+
+
+def generate_observables(N,rules):
+	g.rule = rules[0,2:]
+	states = g.states
+
+
 	R = rules.shape[0]
 	print("_"*R)
 	observables = np.zeros((R,18))
+	mats = np.zeros((R,states,states))
 	for i in range(R):
 		g.rule = rules[i,2:]
 		observables[i,0] = rules[i,0] #wolfram class label
 		observables[i,1] = rules[i,1] #is interesting label
-		observables[i,2:]= g.get_metrics(N)
+		observables[i,2:],mats[i]= g.get_metrics(N)
 		sys.stdout.write("#")
 		sys.stdout.flush()
 
-	np.save("8state_ml_data.npy",observables)
+	np.save(str(states)+"state_ml_data.npy",observables)
+	np.save(str(states)+"state_transition_matrices.npy")
 	
 	#observables = np.load("2state_ml_data.npy")
 	print(observables[0])
