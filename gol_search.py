@@ -59,7 +59,7 @@ def main():
 	#data = smooth_perm_explore(32)
 	#np.save("4state_rules_sp_32_16",data)
 	
-
+	"""
 	r1 = np.load("4state_rules_sp_32_1.npy")
 	r2 = np.load("4state_rules_sp_32_2.npy")
 	r3 = np.load("4state_rules_sp_32_3.npy")
@@ -76,10 +76,10 @@ def main():
 	r14 = np.load("4state_rules_sp_32_14.npy")
 	r15 = np.load("4state_rules_sp_32_15.npy")
 	r16 = np.load("4state_rules_sp_32_16.npy")
-
 	rules = np.vstack((r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16))
 	print(rules.shape)
 	np.save("4state_rules_sp_combined",rules)
+	"""
 
 	#data = np.load("8state_ml_data.npy")
 	#print(data.shape)
@@ -122,7 +122,8 @@ def main():
 
 	#print(rules.shape)
 	#print(rules[1])
-	#generate_observables(8,rules)
+	rules = np.load("4state_rules_sp_combined.npy")
+	generate_observables(8,rules)
 	#plot_observables(15,13)
 	"""
 	g.rule_gen()
