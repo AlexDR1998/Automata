@@ -262,7 +262,7 @@ def generate_observables(N,rules):
 		sys.stdout.flush()
 
 	np.save(str(states)+"state_ml_data.npy",observables)
-	np.save(str(states)+"state_transition_matrices.npy")
+	np.save(str(states)+"state_transition_matrices.npy",mats)
 	
 	#observables = np.load("2state_ml_data.npy")
 	print(observables[0])
