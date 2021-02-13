@@ -5,6 +5,7 @@ import scipy as sp
 from scipy import signal
 from scipy import ndimage
 import sys
+import itertools
 #from sklearn import neighbors
 #import h5py
 #import tensorflow as tf 
@@ -146,6 +147,28 @@ class Grid2D(object):
         self.nsize = nsize
         self.symmetries = symmetries
         s = self.states
+        
+        self.k = int(multi_subset(self.states,8))
+        #self.k=np.array([[1, 1,1],
+        #                 [1,_k,1],
+        #                 [1, 1,1]])
+        
+
+        self.k_ns = np.array([[1,1,1],
+                              [1,0,1],
+                              [1,1,1]])
+        _ar = np.zeros((self.k,8))
+        for i,el in enumerate(itertools.combinations_with_replacement(range(self.states),8)):
+            _ar[i,:] = el
+        
+        #Use lookup table to map result of array exponential function to interval 0-Rule size
+        sorted_outputs = np.sort(np.sum((8+1)**(_ar),axis=1)/8).astype(int)
+        self.lookup = np.zeros(np.max(sorted_outputs)+1).astype(int)
+        for i in range(sorted_outputs.shape[0]):
+            self.lookup[sorted_outputs[i]]=i
+        print(self.lookup)
+        """
+
         if symmetries==1:
             self.n_struct=np.array([4,4,4])
             _k = 1+(s-1)*self.n_struct
@@ -201,6 +224,8 @@ class Grid2D(object):
                                  [1,1,_k[0],1,1],
                                  [1,1,1,1,1],
                                  [1,1,1,1,1]])
+        
+        """
         #How many iterations to run the code for
         self.max_iters = iterations
         #Call rule generator
@@ -282,10 +307,34 @@ class Grid2D(object):
         rule3 = np.array(self.rule,copy=True)
         rule4 = np.array(self.rule,copy=True)
 
+        mask1 = np.zeros(length)
+        mask2 = np.zeros(length)
+        mask3 = np.zeros(length)
+        mask4 = np.zeros(length)
+    
+        mask1[:length//4] = 1
+        mask2[length//4:length//2] = 1
+        mask3[length//2:3*length//4] = 1
+        mask4[3*length//4:] = 1
+
+        amount = np.random.choice([0,1],size=length,p=[1-am,am])
+        mutation = np.random.randint(1,self.states,size=length)
+        
+
+        m1 = (mask1*amount*mutation).astype(int)
+        m2 = (mask2*amount*mutation).astype(int)
+        m3 = (mask3*amount*mutation).astype(int)
+        m4 = (mask4*amount*mutation).astype(int)
+
+        rule1 = (rule1+m1)%self.states
+        rule2 = (rule2+m2)%self.states
+        rule3 = (rule3+m3)%self.states
+        rule4 = (rule4+m4)%self.states
 
         #print(len(rule1))
         #print(self.rule.shape)
         #print(self.rule)
+        """
         for x in range(0,int(length/4)):
             #print(x)
             r = np.random.rand()
@@ -316,7 +365,7 @@ class Grid2D(object):
                 rule4[x]=(rule4[x]+1)%self.states
             elif r<am:
                 rule4[x]=(rule4[x]-1)%self.states
-
+        """
         #print(self.rule-rule1)
         #print(self.rule-rule2)
         #print(self.rule-rule3)
@@ -326,17 +375,17 @@ class Grid2D(object):
         p = len(self.rule)
         zs = np.zeros((self.size//2,self.size//2))
         for i in range(self.max_iters):
-            self.next_state=signal.convolve2d(self.current_state,self.k,boundary='wrap',mode='same')
-            v1 = np.vectorize(lambda y:rule1[y%p])
-            v2 = np.vectorize(lambda y:rule2[y%p])
-            v3 = np.vectorize(lambda y:rule3[y%p])
-            v4 = np.vectorize(lambda y:rule4[y%p])
+            #self.next_state=signal.convolve2d(self.current_state,self.k,boundary='wrap',mode='same').astype(int)
+            v1 = np.vectorize(lambda y:rule1[y])
+            v2 = np.vectorize(lambda y:rule2[y])
+            v3 = np.vectorize(lambda y:rule3[y])
+            v4 = np.vectorize(lambda y:rule4[y])
 
 
-            self.current_state[0:self.size//2,0:self.size//2] = v1(self.next_state[0:self.size//2,0:self.size//2])
-            self.current_state[0:self.size//2,self.size//2:self.size] = v2(self.next_state[0:self.size//2,self.size//2:self.size])
-            self.current_state[self.size//2:self.size,0:self.size//2] = v3(self.next_state[self.size//2:self.size,0:self.size//2])
-            self.current_state[self.size//2:self.size,self.size//2:self.size] = v4(self.next_state[self.size//2:self.size,self.size//2:self.size])
+            self.current_state[0:self.size//2,0:self.size//2] = self.update_grid(self.current_state[0:self.size//2,0:self.size//2],v1)
+            self.current_state[0:self.size//2,self.size//2:self.size] = self.update_grid(self.current_state[0:self.size//2,self.size//2:self.size],v2)
+            self.current_state[self.size//2:self.size,0:self.size//2] = self.update_grid(self.current_state[self.size//2:self.size,0:self.size//2],v3)
+            self.current_state[self.size//2:self.size,self.size//2:self.size] = self.update_grid(self.current_state[self.size//2:self.size,self.size//2:self.size],v4)
             self.current_state[:][self.size//2]=0
             self.current_state[self.size//2][:]=0
 
@@ -358,6 +407,19 @@ class Grid2D(object):
         elif best==4:
             self.rule=np.array(self.child4,copy=True)
 
+
+
+    def update_grid(self,current_state,v):
+        #returns the next state grid, same shape as current grid
+        _exp = 9**current_state
+        _ns = (signal.convolve2d(_exp,self.k_ns,boundary='wrap',mode='same')/8).astype(int)
+        neighbour_number = self.lookup[_ns]
+        #print(neighbour_number)
+        key = (self.k*current_state) + neighbour_number
+        #print(key)
+        return v(key)
+
+
     def run(self,random_init=True,compute_t_matrix=False):
         #initialises random starting state
         if random_init:
@@ -367,11 +429,15 @@ class Grid2D(object):
         ss = np.arange(s)
         p = len(self.rule)
 
+        # --- is outer-totalistic, not pseudo-outer-totalistic
+
+        v = np.vectorize(lambda y:self.rule[y])
         for i in range(self.max_iters):
             #Convolve to calculate next global state
-            v = np.vectorize(lambda y:self.rule[y%p])
-            self.next_state=v(signal.convolve2d(self.current_state,self.k,boundary='wrap',mode='same'))
+            #v = np.vectorize(lambda y:self.rule[y%p])
             
+            #self.next_state=v(signal.convolve2d(self.current_state,self.k,boundary='wrap',mode='same').astype(int))
+            self.next_state = self.update_grid(self.current_state,v)
             #Update transition density matrix - gets slow for large number of states
             if compute_t_matrix:
                 g_i = np.tile(self.current_state,(s,1,1))
@@ -393,7 +459,7 @@ class Grid2D(object):
                 self.current_state[(self.size/2-10):(self.size/2+10),(self.size/2-10):(self.size/2+10)] = self.states-1
             self.image[i] = self.current_state
         #print(self.iterations)
-  
+        
 
     def im_out(self):
         return self.image
@@ -845,9 +911,12 @@ class Grid2D(object):
         #print(self.nsize)
         #for x in range(0,self.nsize):
         #    n = n + self.n_struct[x]*(self.states-1)*self.states**(x+1)
-        n = self.states
+        n = int(self.states*multi_subset(self.states,8))
+        """
         for x in range(0,self.nsize):
             n*=(1+(self.states-1)*self.n_struct[x])
+        """
+
         self.rule = np.random.randint(self.states,size=n)
         
         if mode==0:
