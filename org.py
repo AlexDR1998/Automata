@@ -942,13 +942,13 @@ class Grid2D(object):
         """
         method to save a rule to csv format
         """
-        nlist = open('2D_rules/sym'+str(self.symmetries)+'/n'+str(self.nsize)+'/s'+str(self.states)+'/namelist.txt','a')
+        nlist = open('2D_rules/s'+str(self.states)+'/namelist.txt','a')
         nlist.write('\n'+name)
         nlist.close()
 
 
 
-        f = '2D_rules/sym'+str(self.symmetries)+'/n'+str(self.nsize)+'/s'+str(self.states)+'/'+name
+        f = '2D_rules/s'+str(self.states)+'/'+name
 
         np.save(f,self.rule)
 
@@ -959,11 +959,11 @@ class Grid2D(object):
         loads a previously saved rule
         """
         try:
-            f = ('2D_rules/sym'+str(self.symmetries)+'/n'+str(self.nsize)+'/s'+str(self.states)+'/'+name+'.csv')#,'r')#
+            f = ('2D_rules/s'+str(self.states)+'/'+name+'.npy')#,'r')#
             self.rule = np.load(f)
             
         except Exception as e:
-            f = ('2D_rules/sym'+str(self.symmetries)+'/n'+str(self.nsize)+'/s'+str(self.states)+'/'+name+'.npy')#,'r')#
+            f = ('2D_rules/s'+str(self.states)+'/'+name+'.csv')#,'r')#
             self.rule = np.load(f)
             #raise e
         #f.close()
@@ -1088,17 +1088,7 @@ class Grid2D(object):
         """
         self.rule = self.states - self.rule
 
-    def store(self,t,name):
-        if t=="d":
-            f = open('2D_rules/n1/ml_data/training/dead/'+name+'.csv','w+')
-        elif t=="i":
-            f = open('2D_rules/n1/ml_data/training/interesting/'+name+'.csv','w+')
-        elif t=="s":
-            f = open('2D_rules/n1/ml_data/training/s_noise/'+name+'.csv','w+')
-        elif t=="n":
-            f = open('2D_rules/n1/ml_data/training/noise/'+name+'.csv','w+')
-        np.save(f,self.rule)
-        f.close()
+    
         
 
 

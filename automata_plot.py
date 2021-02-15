@@ -20,8 +20,8 @@ def main():
     global states
     global symm
     states = int(input("Enter number of states: "))
-    symm = int(input("Enter neighbourhood type (0,1 or 2): "))
-    neighbours = int(input("Enter size of cell neighbourhood: "))
+    symm = 2#int(input("Enter neighbourhood type (0,1 or 2): "))
+    neighbours = 1#int(input("Enter size of cell neighbourhood: "))
     global size
     size = int(input("Enter size of grid: "))
     global iterations
@@ -200,6 +200,8 @@ def main():
         if inp=="sample":
             n=int(input("Enter sample rate: "))
             ani_display(mode=6,n=n)
+        if inp=="pred":
+            print(g.predict_interesting())
         #if inp!="q":
         #    name = "rule_"+str(counter)
         #    t = str(input("Enter rule type(i,d,n,s): "))
@@ -273,7 +275,7 @@ def read_saved_rules(n,s,sym):
     f = open("text_resources/name_header.txt","r")
     print(f.read())
     f.close()
-    f = open('2D_rules/sym'+str(sym)+'/n'+str(n)+'/s'+str(s)+'/namelist.txt','r')
+    f = open('2D_rules/s'+str(s)+'/namelist.txt','r')
     print(f.read())
     f.close()
     f = open("text_resources/name_foot.txt","r")
