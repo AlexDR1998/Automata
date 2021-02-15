@@ -736,7 +736,7 @@ class Grid2D(object):
 
         #sys.stdout.write("|")
         #sys.stdout.flush()
-        return (symmetry_coeff,spacial_peaks,temporal_peaks)
+        return (symmetry_coeff,spacial_peaks,temporal_peaks,fd[:,t0])
 
 
 
@@ -861,7 +861,7 @@ class Grid2D(object):
         self.max_iters = 256
         self.image = np.zeros((self.max_iters,self.size,self.size))
         self.run()
-        symmetry,spacial,temporal = self.fft()
+        symmetry,spacial,temporal,stat_struct = self.fft()
 
 
 
@@ -882,7 +882,7 @@ class Grid2D(object):
 
         #Sometimes std for small number of states makes NaN - set these to 0
         metrics[np.isnan(metrics)]=0
-        return metrics,mat
+        return metrics,mat,e_data,l_data,stat_struct
 
 
         #plt.plot(l_data)

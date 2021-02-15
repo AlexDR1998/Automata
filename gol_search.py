@@ -59,7 +59,7 @@ def main():
 	#data = smooth_perm_explore(32)
 	#np.save("8state_rules_sp_32_16",data)
 	
-	"""
+	
 	r1 = np.load("8state_rules_sp_32_1.npy")
 	r2 = np.load("8state_rules_sp_32_2.npy")
 	r3 = np.load("8state_rules_sp_32_3.npy")
@@ -78,8 +78,8 @@ def main():
 	r16 = np.load("8state_rules_sp_32_16.npy")
 	rules = np.vstack((r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16))
 	print(rules.shape)
-	np.save("8state_rules_sp_combined",rules)
-	"""
+	#np.save("8state_rules_sp_combined",rules)
+	
 
 	#data = np.load("8state_ml_data.npy")
 	#print(data.shape)
@@ -122,7 +122,7 @@ def main():
 
 	#print(rules.shape)
 	#print(rules[1])
-	rules = np.load("8state_rules_sp_combined.npy")
+	#rules = np.load("8state_rules_sp_combined.npy")
 	generate_observables(8,rules)
 	#plot_observables(15,13)
 	"""
@@ -253,16 +253,22 @@ def generate_observables(N,rules):
 	print("_"*R)
 	observables = np.zeros((R,18))
 	mats = np.zeros((R,states,states))
+	e_data = np.zeros((R,512))
+	l_data = np.zeros((R,g.size//2))
+	stat_struct = np.zeros((R,g.states,g.size,g.size)).astype("complex")
 	for i in range(R):
 		g.rule = rules[i,2:]
 		observables[i,0] = rules[i,0] #wolfram class label
 		observables[i,1] = rules[i,1] #is interesting label
-		observables[i,2:],mats[i]= g.get_metrics(N)
+		observables[i,2:],mats[i],e_data[i],l_data[i],stat_struct[i] = g.get_metrics(N)
 		sys.stdout.write("#")
 		sys.stdout.flush()
 
 	np.save(str(states)+"state_ml_data.npy",observables)
 	np.save(str(states)+"state_transition_matrices.npy",mats)
+	np.save(str(states)+"state_entropy_raw.npy",e_data)
+	np.save(str(states)+"state_divergence_raw.npy",l_data)
+	np.save(str(states)+"state_stationary_structures_raw.npy",stat_struct)
 	
 	#observables = np.load("2state_ml_data.npy")
 	print(observables[0])
