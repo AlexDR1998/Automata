@@ -386,8 +386,8 @@ class Grid2D(object):
             self.current_state[0:self.size//2,self.size//2:self.size] = self.update_grid(self.current_state[0:self.size//2,self.size//2:self.size],v2)
             self.current_state[self.size//2:self.size,0:self.size//2] = self.update_grid(self.current_state[self.size//2:self.size,0:self.size//2],v3)
             self.current_state[self.size//2:self.size,self.size//2:self.size] = self.update_grid(self.current_state[self.size//2:self.size,self.size//2:self.size],v4)
-            self.current_state[:][self.size//2]=0
-            self.current_state[self.size//2][:]=0
+            #self.current_state[:][self.size//2]=0
+            #self.current_state[self.size//2][:]=0
 
             self.image[i] = self.current_state
 
@@ -835,7 +835,11 @@ class Grid2D(object):
         #Run divergence data simulations and fit to power law
         l_data = np.mean(self.lyap(4*N,norm=True),axis=0)#[:self.size//2]
         ts = np.arange(l_data.shape[0])
-        l_params,_ = sp.optimize.curve_fit(power_law,ts,l_data)
+        try:
+            #Include try/except as curve_fit occasionally fails to find optimal parameters and then crashes
+            l_params,_ = sp.optimize.curve_fit(power_law,ts,l_data)    
+        except RuntimeError:
+            l_params = np.zeros(3)
 
 
         #---  Entropy
