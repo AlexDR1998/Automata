@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import math
 import scipy as sp 
 from scipy import signal
@@ -11,107 +11,6 @@ import itertools
 #import tensorflow as tf 
 #from tensorflow import keras
 
-
-"""
-    1 dimensional cellular automata, with multiple colour options
-
-"""
-
-
-
-class Grid(object):
-
-
-    def __init__(self,size,density,states,nsize,iterations):
-        self.size = size
-        #selection of initialising methods for state
-        self.init_density = density
-        self.nsize = nsize
-        #nsize should be odd number
-        self.states = states
-        #self.current_state = np.zeros(size)
-        self.rule = np.random.randint(states,size=states**nsize)
-        self.rule[0]=0
-        for x in range(states**nsize):
-            if np.random.rand()>0.6:
-                self.rule[x]=0
-        if self.nsize%2==0:
-            for x in range(states):
-                self.rule[x]=x
-        #self.current_state = np.random.randint(self.states,size=self.size)
-
-        self.previous_state = np.zeros(size)
-        self.next_state = np.zeros(size)
-        self.init_state = np.zeros(size)
-        #store data here for image output
-        self.image = np.zeros((iterations,size))
-        self.max_iters = iterations
-
-
-
-    def update_cell(self,pos):
-        """
-        updates cell at position pos to next state, based on rule
-        and neighbouring cells
-        """
-
-        n = int((self.nsize-1)/2)
-        #print(len(self.rule))
-        index = 0
-        
-        if self.nsize%2==0:
-            #if even number of neighbouring cells count, use middle cell of older state
-            index = index+self.previous_state[pos]#*self.states**(self.nsize-1)
-            
-            for x in range(1,self.nsize-1):
-                #loop for each neighbouring cell
-                index = index+self.current_state[(pos-n+x)%self.size]*self.states**x
-                #print(x)
-            
-
-        else:
-            for x in range(self.nsize):
-
-                #loop for each neighbouring cell
-                index = index+self.current_state[(pos-n+x)%self.size]*self.states**x
-                #print(x)
-
-
-
-        self.next_state[pos]=self.rule[int(index)]
-
-    def initialise_random(self):
-        self.current_state = np.random.randint(self.states,size=self.size)
-        for x in range(self.size):
-            if np.random.rand()>self.init_density:
-                self.current_state[x]=0
-        self.init_state = self.current_state[:]
-
-    def initialise_mutate(self,n):
-        r = np.random.randint(0,self.size,n)
-        self.init_state[r] = np.random.randint(0,self.states,n)
-
-    def run(self):
-
-        """
-        runs update_cell on every cell in a given state, then updates the state,
-        then repeats. Saves data to self.image for output
-        """
-        
-        self.current_state = self.init_state[:]
-        for i in range(self.max_iters):
-            for x in range(self.size):
-                self.update_cell(x)
-            self.previous_state = self.current_state
-            self.current_state = self.next_state
-            self.image[i] = self.current_state
-
-
-    def im_out(self):
-        return self.image
-
-
-    #def save(self):
 
 
 class Grid2D(object):
@@ -166,7 +65,9 @@ class Grid2D(object):
         self.lookup = np.zeros(np.max(sorted_outputs)+1).astype(int)
         for i in range(sorted_outputs.shape[0]):
             self.lookup[sorted_outputs[i]]=i
-        print(self.lookup)
+        #print(self.lookup)
+
+        self.rule_length = int(self.states*self.k)
         """
 
         if symmetries==1:
@@ -915,7 +816,7 @@ class Grid2D(object):
         #print(self.nsize)
         #for x in range(0,self.nsize):
         #    n = n + self.n_struct[x]*(self.states-1)*self.states**(x+1)
-        n = int(self.states*multi_subset(self.states,8))
+        n = self.rule_length#
         """
         for x in range(0,self.nsize):
             n*=(1+(self.states-1)*self.n_struct[x])
@@ -1029,6 +930,23 @@ class Grid2D(object):
         self.rule = rule
 
             
+
+
+    def rule_swap(self):
+        #Shuffles rule array such that the labels of central states are swapped randomly
+        rule = self.rule
+        L = rule.shape[0]
+        rule = np.random.permutation(rule.reshape((self.states,L//self.states))).reshape(L)
+        self.rule = rule
+    
+    def rule_roll(self,amount):
+        rule = self.rule
+        L = rule.shape[0]
+        r_mat = rule.reshape((self.states,L//self.states))
+        self.rule = np.roll(r_mat,amount,axis=1).reshape(L)
+        
+
+
     def rule_fold(self,amount):
         """
         a bit like the opposit of the smooth method
@@ -1090,7 +1008,7 @@ class Grid2D(object):
         """
         inverts a rule, element by element
         """
-        self.rule = self.states - self.rule
+        self.rule = (self.states - self.rule -1)
 
     
         
