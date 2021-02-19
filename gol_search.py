@@ -26,7 +26,7 @@ def main():
 	np.seterr("ignore")
 	global states
 	global symm
-	states = 8
+	states = 4
 	symm = 2
 	neighbours = 1
 	global size
@@ -57,25 +57,25 @@ def main():
 
 	
 	#data = smooth_perm_explore(32)
-	#np.save("8state_rules_sp_32_16",data)
+	#np.save("4state_rules_sp_32_16",data)
 	
 	
-	r1 = np.load("8state_rules_sp_32_1.npy")
-	r2 = np.load("8state_rules_sp_32_2.npy")
-	r3 = np.load("8state_rules_sp_32_3.npy")
-	r4 = np.load("8state_rules_sp_32_4.npy")
-	r5 = np.load("8state_rules_sp_32_5.npy")
-	r6 = np.load("8state_rules_sp_32_6.npy")
-	r7 = np.load("8state_rules_sp_32_7.npy")
-	r8 = np.load("8state_rules_sp_32_8.npy")
-	r9 = np.load("8state_rules_sp_32_9.npy")
-	r10 = np.load("8state_rules_sp_32_10.npy")
-	r11 = np.load("8state_rules_sp_32_11.npy")
-	r12 = np.load("8state_rules_sp_32_12.npy")
-	r13 = np.load("8state_rules_sp_32_13.npy")
-	r14 = np.load("8state_rules_sp_32_14.npy")
-	r15 = np.load("8state_rules_sp_32_15.npy")
-	r16 = np.load("8state_rules_sp_32_16.npy")
+	r1 = np.load("4state_rules_sp_32_1.npy")
+	r2 = np.load("4state_rules_sp_32_2.npy")
+	r3 = np.load("4state_rules_sp_32_3.npy")
+	r4 = np.load("4state_rules_sp_32_4.npy")
+	r5 = np.load("4state_rules_sp_32_5.npy")
+	r6 = np.load("4state_rules_sp_32_6.npy")
+	r7 = np.load("4state_rules_sp_32_7.npy")
+	r8 = np.load("4state_rules_sp_32_8.npy")
+	r9 = np.load("4state_rules_sp_32_9.npy")
+	r10 = np.load("4state_rules_sp_32_10.npy")
+	r11 = np.load("4state_rules_sp_32_11.npy")
+	r12 = np.load("4state_rules_sp_32_12.npy")
+	r13 = np.load("4state_rules_sp_32_13.npy")
+	r14 = np.load("4state_rules_sp_32_14.npy")
+	r15 = np.load("4state_rules_sp_32_15.npy")
+	r16 = np.load("4state_rules_sp_32_16.npy")
 	rules = np.vstack((r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16))
 	print(rules.shape)
 	#np.save("8state_rules_sp_combined",rules)
@@ -438,7 +438,7 @@ def smooth_perm_explore(N):
 		rule_and_class[n,0] = int(input("Estimate wolfram class: "))
 		rule_and_class[n,1] = int(input("Is there interesting structure: "))
 		rule_and_class[n,2:]= np.copy(g.rule)
-		choice = int(input("Smooth, permute, offset or mutate? (0/1/2/3): "))
+		choice = int(input("Smooth, permute, offset, swap, roll or mutate? (0/1/2/3/4/5): "))
 		if choice==0:
 			g.rule_smooth(3)
 		if choice==1:
@@ -446,6 +446,10 @@ def smooth_perm_explore(N):
 		if choice==2:
 			g.rule_offset(k)
 		if choice==3:
+			g.rule_swap()
+		if choice==4:
+			g.rule_roll(np.random.randint(-10,10))
+		if choice==5:
 			g.run_mutate()
 			ani_display()
 			best = int(input("Select best rule (1-4): "))
