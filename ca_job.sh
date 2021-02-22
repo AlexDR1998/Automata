@@ -5,4 +5,4 @@
 #$ -l h_vmem=4G
 
 module load python/3.4.3
-./ed_ca_run.py 8 $1
+python ed_ca_run.py 8 $1
