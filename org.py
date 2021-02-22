@@ -1033,7 +1033,7 @@ def multi_subset(x,y):
     return math.factorial(x+y-1)/(math.factorial(y)*math.factorial(x-1))
 
 def power_law(x,A,B,C):
-    return A*(np.float_power(x,B))+C
+    return A*(np.power(x.astype(float),B.astype(float)))+C
 
 def one_hot_encode(data,s):
     #One hot encoder for 3D array of ints
