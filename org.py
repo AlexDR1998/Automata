@@ -752,7 +752,8 @@ class Grid2D(object):
         #Run entropy simulations and calculate smoothed variations
         e_data = np.mean(self.entropy(N),axis=0)
         a,b = sp.signal.butter(5,0.1,analog=False)
-        e_smooth_var = np.mean(np.abs(np.diff(sp.signal.filtfilt(a,b,e_data),prepend=0)[100:self.max_iters-50]))
+        filtered = np.r_[0,sp.signal.filtfilt(a,b,e_data)]
+        e_smooth_var = np.mean(np.abs(np.diff(filtered)[100:self.max_iters-50]))
         e_mean = np.mean(e_data)
         e_var = np.std(e_data)
 
