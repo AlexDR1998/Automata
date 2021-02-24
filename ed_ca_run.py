@@ -26,12 +26,12 @@ for i in range(N_rules):
 	observables[i],mats[i],e_data[i],l_data[i],_=g.get_metrics(N_obs_reps)
 
 try:
-	os.mkdir("results_"+str(instance))
+	os.mkdir(str(states)+"_state_results")
 except OSError:
 	print("Failed to creat directory")
 
-np.save("results_"+str(instance)+"/"+str(states)+"state_observables.npy",observables)
-np.save("results_"+str(instance)+"/"+str(states)+"state_transition_mats.npy",mats)
-np.save("results_"+str(instance)+"/"+str(states)+"state_rules.npy",rules)
-np.save("results_"+str(instance)+"/"+str(states)+"state_raw_entropy.npy",e_data)
-np.save("results_"+str(instance)+"/"+str(states)+"state_raw_lyap.npy",l_data)
+np.save(str(states)+"_state_results/observables"+str(instance)+".npy",observables)
+np.save(str(states)+"_state_results/transition_mats"+str(instance)+".npy",mats)
+np.save(str(states)+"_state_results/rules"+str(instance)+".npy",rules)
+np.save(str(states)+"_state_results/raw_entropy"+str(instance)+".npy",e_data)
+np.save(str(states)+"_state_results/raw_lyap"+str(instance)+".npy",l_data)
