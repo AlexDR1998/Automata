@@ -8,7 +8,11 @@ import sys
 import os
 #import itertools
 
-
+try:
+	os.mkdir(str(states)+"_state_results")
+except OSError:
+	print("Failed to creat directory")
+	
 N_rules=1000
 N_obs_reps = 8
 states = int(sys.argv[1])
@@ -25,10 +29,7 @@ for i in range(N_rules):
 	g.rule = rules[i]
 	observables[i],mats[i],e_data[i],l_data[i],_=g.get_metrics(N_obs_reps)
 
-try:
-	os.mkdir(str(states)+"_state_results")
-except OSError:
-	print("Failed to creat directory")
+
 
 np.save(str(states)+"_state_results/observables"+str(instance)+".npy",observables)
 np.save(str(states)+"_state_results/transition_mats"+str(instance)+".npy",mats)
