@@ -8,10 +8,6 @@ import sys
 import os
 #import itertools
 
-try:
-	os.mkdir(str(states)+"_state_results")
-except OSError:
-	print("Failed to creat directory")
 	
 N_rules=1000
 N_obs_reps = 8
@@ -19,6 +15,13 @@ states = int(sys.argv[1])
 instance = int(sys.argv[2])
 size = 128
 iterations = 128
+
+try:
+	os.mkdir(str(states)+"_state_results")
+except OSError:
+	print("Failed to creat directory")
+
+
 g = Grid2D(size,0.5,states,1,iterations,1)
 rules = np.random.randint(states,size=(N_rules,g.rule_length))
 observables = np.zeros((N_rules,16))
