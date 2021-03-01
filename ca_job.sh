@@ -6,5 +6,5 @@
 
 module load anaconda
 source activate mphys_python
-python ed_ca_run.py 8 $1
+python ./ed_ca_run.py 8 $1
 source deactivate
