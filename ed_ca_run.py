@@ -29,6 +29,7 @@ mats = np.zeros((N_rules,states,states))
 e_data = np.zeros((N_rules,512))
 l_data = np.zeros((N_rules,g.size//2))
 for i in range(N_rules):
+	print(i)
 	g.rule = rules[i]
 	observables[i],mats[i],e_data[i],l_data[i],_=g.get_metrics(N_obs_reps)
 
