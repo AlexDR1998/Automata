@@ -10,7 +10,7 @@ import os
 
 	
 N_rules=1000
-N_obs_reps = 8
+N_obs_reps = 4
 states = int(sys.argv[1])
 instance = int(sys.argv[2])
 size = 128
@@ -24,7 +24,7 @@ except OSError:
 
 g = Grid2D(size,0.5,states,1,iterations,1)
 rules = np.random.randint(states,size=(N_rules,g.rule_length))
-observables = np.zeros((N_rules,16))
+observables = np.zeros((N_rules,18))
 mats = np.zeros((N_rules,states,states))
 e_data = np.zeros((N_rules,512))
 l_data = np.zeros((N_rules,g.size//2))

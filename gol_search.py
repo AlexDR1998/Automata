@@ -270,7 +270,7 @@ def generate_observables(N,rules):
 
 	R = rules.shape[0]
 	print("_"*R)
-	observables = np.zeros((R,18))
+	observables = np.zeros((R,20))
 	mats = np.zeros((R,states,states))
 	e_data = np.zeros((R,512))
 	l_data = np.zeros((R,g.size//2))
