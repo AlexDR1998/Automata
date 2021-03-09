@@ -28,10 +28,11 @@ observables = np.zeros((N_rules,16))
 mats = np.zeros((N_rules,states,states))
 e_data = np.zeros((N_rules,512))
 l_data = np.zeros((N_rules,g.size//2))
+mf_err = np.zeros((N_rules,512))
 for i in range(N_rules):
 	print(i)
 	g.rule = rules[i]
-	observables[i],mats[i],e_data[i],l_data[i],_=g.get_metrics(N_obs_reps)
+	observables[i],mats[i],e_data[i],l_data[i],_,mf_err[i]=g.get_metrics(N_obs_reps)
 
 
 
@@ -40,3 +41,4 @@ np.save(str(states)+"_state_results/transition_mats"+str(instance)+".npy",mats)
 np.save(str(states)+"_state_results/rules"+str(instance)+".npy",rules)
 np.save(str(states)+"_state_results/raw_entropy"+str(instance)+".npy",e_data)
 np.save(str(states)+"_state_results/raw_lyap"+str(instance)+".npy",l_data)
+np.save(str(states)+"_state_results/raw_mf_err"+str(instance)+".npy",mf_err)
