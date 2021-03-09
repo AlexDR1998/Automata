@@ -26,7 +26,7 @@ def main():
 	np.seterr("ignore")
 	global states
 	global symm
-	states = 8
+	states = 4
 	symm = 2
 	neighbours = 1
 	global size
@@ -60,7 +60,7 @@ def main():
 	#data = smooth_perm_explore(32)
 	#np.save("4state_rules_sp_32_16",data)
 	
-	
+	"""
 	r1 = np.load("8state_rules_sp_32_1.npy")
 	r2 = np.load("8state_rules_sp_32_2.npy")
 	r3 = np.load("8state_rules_sp_32_3.npy")
@@ -79,8 +79,7 @@ def main():
 	r16 = np.load("8state_rules_sp_32_16.npy")
 	rules = np.vstack((r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16))
 	print(rules.shape)
-	generate_observables(4,rules)
-	
+	"""
 	#np.save("Data/8state_rules_sp_combined",rules)
 	
 
@@ -88,11 +87,12 @@ def main():
 	#print(data.shape)
 
 
+	rules = np.load("Data/4state_rules_sp_combined.npy")
+	generate_observables(4,rules)
 
 
 
 	"""	
-	rules = np.load("Data/8state_rules_sp_combined.npy")
 
 	g.rule = rules[0,2:]
 	states = g.states
@@ -137,20 +137,20 @@ def main():
 	
 
 
-	"""
+	
 	#--- Plotting stuff for report
-
+	"""
 	ns = np.random.choice(512,size=128)
-	e_data = np.load("Data/8state_entropy_raw.npy")[ns]
-	rules = np.load("Data/8state_ml_data.npy")[ns]
+	l_data = np.load("Data/8state_divergence_raw.npy")#[ns]
+	rules = np.load("Data/8state_ml_data.npy")#[ns]
 	print(np.sum(rules[:,1]==1))
-	entropy_fit(e_data,rules[:,0],rules[:,1])
+	lyap_fit(l_data,rules[:,0],rules[:,1])
 
 
-	e_data = np.load("Data/4state_entropy_raw.npy")[ns]
-	rules = np.load("Data/4state_ml_data.npy")[ns]
+	l_data = np.load("Data/4state_divergence_raw.npy")#[ns]
+	rules = np.load("Data/4state_ml_data.npy")#[ns]
 	print(np.sum(rules[:,1]==1))
-	entropy_fit(e_data,rules[:,0],rules[:,1])
+	lyap_fit(l_data,rules[:,0],rules[:,1])
 	"""
 
 
@@ -647,10 +647,10 @@ def lyap_fit(data,wclass,is_interesting):
 	#Fit lyap divergence to a power lay L=At^B
 	#Axis 0 - Which rule?
 	#Axis 1 - data per rule
-	mean_data = data[0,:,:]
+	
 	M = data.shape[0]-2
-	N = mean_data.shape[0]
-	its = mean_data.shape[1]
+	N = data.shape[0]
+	its = data.shape[1]
 	ts = np.arange(its)
 	def power_law(x,A,B,C):
 		return A*(np.float_power(x,B))+C
@@ -658,10 +658,18 @@ def lyap_fit(data,wclass,is_interesting):
 	params = np.zeros((N,3))
 	
 	for i in range(N):
-		params[i],_ = sp.optimize.curve_fit(power_law,ts,mean_data[i])
+		params[i],_ = sp.optimize.curve_fit(power_law,ts,data[i])
 	
 
-	
+	plt.plot(ts,data[is_interesting==1].T,color="blue",alpha=0.1)
+	plt.plot(ts,data[is_interesting==0].T,color="red",alpha=0.1)
+
+	plt.plot([],color="blue",label="Interesting")
+	plt.plot([],color="red",label="Boring")
+	plt.legend()
+	plt.xlabel("Timesteps")
+	plt.ylabel("Divergence (normalised between 0 and 1)")
+	plt.show()
 	
 	
 	plt.subplot(221)
@@ -695,27 +703,27 @@ def lyap_fit(data,wclass,is_interesting):
 	plt.suptitle("Power law fits to divergence of CA, with Wolfram class (512 2 state rules)")
 	plt.show()
 	
-	plt.subplot(221)
-	plt.scatter(params[is_interesting==0,1],params[is_interesting==0,0],color="red",label="boring")
-	plt.scatter(params[is_interesting==1,1],params[is_interesting==1,0],color="blue",label="interesting")
+	plt.subplot(131)
+	plt.scatter(params[is_interesting==0,1],params[is_interesting==0,0],color="red",label="boring",alpha=0.1)
+	plt.scatter(params[is_interesting==1,1],params[is_interesting==1,0],color="blue",label="interesting",alpha=0.1)
 	plt.xlabel("Exponent")
 	plt.ylabel("Prefactor")
 	#plt.legend()
 
-	plt.subplot(223)
-	plt.scatter(params[is_interesting==0,1],params[is_interesting==0,2],color="red",label="boring")
-	plt.scatter(params[is_interesting==1,1],params[is_interesting==1,2],color="blue",label="interesting")
+	plt.subplot(133)
+	plt.scatter(params[is_interesting==0,1],params[is_interesting==0,2],color="red",label="boring",alpha=0.1)
+	plt.scatter(params[is_interesting==1,1],params[is_interesting==1,2],color="blue",label="interesting",alpha=0.1)
 	plt.xlabel("Exponent")
 	plt.ylabel("Offset")
 	#plt.legend()
 
-	plt.subplot(222)
-	plt.scatter(params[is_interesting==0,2],params[is_interesting==0,0],color="red",label="boring")
-	plt.scatter(params[is_interesting==1,2],params[is_interesting==1,0],color="blue",label="interesting")
+	plt.subplot(132)
+	plt.scatter(params[is_interesting==0,2],params[is_interesting==0,0],color="red",label="boring",alpha=0.1)
+	plt.scatter(params[is_interesting==1,2],params[is_interesting==1,0],color="blue",label="interesting",alpha=0.1)
 	plt.xlabel("Offset")
 	plt.ylabel("Prefactor")
 	plt.legend()
-	plt.suptitle("Power law fits to divergence of CA, with binary classifier (512 2 state rules)")
+	#plt.suptitle("Power law fits to divergence of CA, with binary classifier (512 2 state rules)")
 	plt.show()
 
 
@@ -731,6 +739,10 @@ def lyap_fit(data,wclass,is_interesting):
 
 
 	return params
+
+
+
+
 
 def entropy_fit(data,wclass,is_interesting):
 	#See how entropy behaviour correlates with classifiers
