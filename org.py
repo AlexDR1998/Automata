@@ -326,6 +326,7 @@ class Grid2D(object):
         if random_init:
             self.init_grid()
         self.d = np.zeros((self.states,self.states))
+        self.d_temp = np.zeros((self.max_iters,self.states,self.states))
         s = self.states
         ss = np.arange(s)
         p = len(self.rule)
@@ -340,12 +341,14 @@ class Grid2D(object):
             #self.next_state=v(signal.convolve2d(self.current_state,self.k,boundary='wrap',mode='same').astype(int))
             self.next_state = self.update_grid(self.current_state,v)
             #Update transition density matrix - gets slow for large number of states
+
             if compute_t_matrix:
                 g_i = np.tile(self.current_state,(s,1,1))
                 g_j = np.tile(self.next_state,(s,1,1))
                 g_i_eq = np.equal(g_i,ss[:,None,None]).astype(int)
                 g_j_eq = np.equal(g_j,ss[:,None,None]).astype(int)
-                self.d+=np.einsum('ixy,jxy->ij',g_i_eq,g_j_eq)
+                self.d_temp[i] = np.einsum('ixy,jxy->ij',g_i_eq,g_j_eq)#/float(self.size**2)
+                self.d+=self.d_temp[i]
             
 
             #for a in range(self.states):
@@ -378,11 +381,31 @@ class Grid2D(object):
 #--- Automated analysis
 
 
-    def density_matrix(self,random_init=True):
+    def density_matrix(self,random_init=True,check_accuracy=True):
 
         self.run(random_init,True)
         self.d = (self.d.T/np.sum(self.d,axis=1)).T 
-        return self.d
+        self.tmat = np.copy(self.d)
+        #self.d_temp = (self.d_temp/np.sum(self.d_temp,axis=2))
+        if check_accuracy:
+            #setup mean field approximation
+            mean_field_individual = np.ones((self.max_iters,self.states))/float(self.states)
+            mean_field_converged = np.ones((self.max_iters,self.states))/float(self.states)
+            for i in range(self.max_iters-1):
+                #self.d_temp[i] = (self.d_temp[i].T/np.sum(self.d_temp[i],axis=1)).T 
+                #mean_field_individual[i+1]=np.einsum("ij,i",self.d_temp[i],mean_field_individual[i])
+                mean_field_converged[i+1]=np.einsum("ij,i",self.d,mean_field_converged[i])
+            #compute actual proportions of each state at each timestep
+            ss = np.arange(self.states)
+            s = np.equal(np.tile(self.image,(self.states,1,1,1)),ss[:,None,None,None])
+            prop = np.sum(s,axis=(2,3))/float(self.size*self.size)
+            err = np.sum(np.abs(prop.T-mean_field_converged),axis=1)
+            #chop off first 16 steps as they are dominated by noise of initial conditions
+            err_mean = np.mean(err[16:])
+            err_var = np.std(err[16:])
+            return (self.d,err_mean,err_var,err)
+        else:
+            return self.d
 
     def fft(self):
         #Performs fft of each state channel seperately and returns (symmetry, [spacial peaks], [temporal peaks])
@@ -675,7 +698,7 @@ class Grid2D(object):
             if norm:
                 where_ne = np.not_equal(data1,data2)
                 def f(a,b):
-                    return np.abs(1-np.sqrt(self.d[a,b]*self.d[b,a]))
+                    return np.abs(1-np.sqrt(self.tmat[a,b]*self.tmat[b,a]))
                 lyap_data[i] = np.sum(np.where(where_ne,f(data1,data2),0),axis=(1,2))/(self.size**2)
             else:
                 lyap_data[i] = np.sum((np.not_equal(data1,data2).astype(int)),axis=(1,2))/(self.size**2) 
@@ -726,10 +749,25 @@ class Grid2D(object):
 
         #sys.stdout.write("||")
         #sys.stdout.flush()
+
+        temp_iters = self.max_iters
+
+        
+        #--- transition matrix meanf field approximation
+
+        #set simulation size - longer runtime gives more strongly converged tmat
+        self.max_iters = 512
+        self.image = np.zeros((self.max_iters,self.size,self.size))
+        #do first as self.tmat is needed for lyapunov divergence
+        _,mf_err_mean,mf_err_var,mf_err = self.density_matrix(True,True)
+
+
+
+
+
         #---  Divergence
         
         #set simulation size - smaller runtime avoids PBC effects
-        temp_iters = self.max_iters
         self.max_iters = self.size//2
         self.image = np.zeros((self.max_iters,self.size,self.size))
         
@@ -784,11 +822,12 @@ class Grid2D(object):
                             spacial[0,0],spacial[0,1],
                             spacial[1,0],spacial[1,1],
                             temporal[0,0],temporal[0,1],
-                            temporal[1,0],temporal[1,1]])
+                            temporal[1,0],temporal[1,1],
+                            mf_err_mean,mf_err_var])
 
         #Sometimes std for small number of states makes NaN - set these to 0
         metrics[np.isnan(metrics)]=0
-        return metrics,mat,e_data,l_data,stat_struct
+        return metrics,mat,e_data,l_data,stat_struct,mf_err
 
 
         #plt.plot(l_data)
@@ -797,7 +836,7 @@ class Grid2D(object):
 
 
 
-    """ Commented out because cplab doesn't have tensorflow
+    #Commented out because cplab doesn't have tensorflow
 
     def predict_interesting(self,N=1):
         #Runs get_metrics on current rule, then feeds output to trained neural network
@@ -806,7 +845,7 @@ class Grid2D(object):
         metrics = metrics.reshape((1,metrics.shape[0]))
         print(metrics)
         return model.predict(metrics)
-    """
+    
 
 
 

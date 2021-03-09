@@ -26,7 +26,7 @@ def main():
 	np.seterr("ignore")
 	global states
 	global symm
-	states = 4
+	states = 8
 	symm = 2
 	neighbours = 1
 	global size
@@ -55,30 +55,32 @@ def main():
 	#np.save("random_walk_gol_rules",data)
 	
 
+
 	
 	#data = smooth_perm_explore(32)
 	#np.save("4state_rules_sp_32_16",data)
 	
-	
-	r1 = np.load("4state_rules_sp_32_1.npy")
-	r2 = np.load("4state_rules_sp_32_2.npy")
-	r3 = np.load("4state_rules_sp_32_3.npy")
-	r4 = np.load("4state_rules_sp_32_4.npy")
-	r5 = np.load("4state_rules_sp_32_5.npy")
-	r6 = np.load("4state_rules_sp_32_6.npy")
-	r7 = np.load("4state_rules_sp_32_7.npy")
-	r8 = np.load("4state_rules_sp_32_8.npy")
-	r9 = np.load("4state_rules_sp_32_9.npy")
-	r10 = np.load("4state_rules_sp_32_10.npy")
-	r11 = np.load("4state_rules_sp_32_11.npy")
-	r12 = np.load("4state_rules_sp_32_12.npy")
-	r13 = np.load("4state_rules_sp_32_13.npy")
-	r14 = np.load("4state_rules_sp_32_14.npy")
-	r15 = np.load("4state_rules_sp_32_15.npy")
-	r16 = np.load("4state_rules_sp_32_16.npy")
+	"""
+	r1 = np.load("Data/8state_rules_sp_32_1.npy")
+	r2 = np.load("Data/8state_rules_sp_32_2.npy")
+	r3 = np.load("Data/8state_rules_sp_32_3.npy")
+	r4 = np.load("Data/8state_rules_sp_32_4.npy")
+	r5 = np.load("Data/8state_rules_sp_32_5.npy")
+	r6 = np.load("Data/8state_rules_sp_32_6.npy")
+	r7 = np.load("Data/8state_rules_sp_32_7.npy")
+	r8 = np.load("Data/8state_rules_sp_32_8.npy")
+	r9 = np.load("Data/8state_rules_sp_32_9.npy")
+	r10 = np.load("Data/8state_rules_sp_32_10.npy")
+	r11 = np.load("Data/8state_rules_sp_32_11.npy")
+	r12 = np.load("Data/8state_rules_sp_32_12.npy")
+	r13 = np.load("Data/8state_rules_sp_32_13.npy")
+	r14 = np.load("Data/8state_rules_sp_32_14.npy")
+	r15 = np.load("Data/8state_rules_sp_32_15.npy")
+	r16 = np.load("Data/8state_rules_sp_32_16.npy")
 	rules = np.vstack((r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16))
 	print(rules.shape)
-	#np.save("8state_rules_sp_combined",rules)
+	"""
+	#np.save("Data/8state_rules_sp_combined",rules)
 	
 
 	#data = np.load("8state_ml_data.npy")
@@ -117,52 +119,69 @@ def main():
 
 
 
-
+	
 
 
 	#print(rules.shape)
 	#print(rules[1])
-	#rules = np.load("8state_rules_sp_combined.npy")
-	generate_observables(8,rules)
-	#plot_observables(15,13)
+	rules = np.load("8state_rules_sp_combined.npy")
+	generate_observables(4,rules)
+	
+	#plot_observables(3,7)
+	
+	#good mean field examples - 150, 170, 207, 280
+	
+	#mean_field(280,100)
+
+
+	
+
+
 	"""
-	g.rule_gen()
-	g.rule_fold(2)
+	#--- Plotting stuff for report
+
+	ns = np.random.choice(512,size=128)
+	e_data = np.load("Data/8state_entropy_raw.npy")[ns]
+	rules = np.load("Data/8state_ml_data.npy")[ns]
+	print(np.sum(rules[:,1]==1))
+	entropy_fit(e_data,rules[:,0],rules[:,1])
+
+
+	e_data = np.load("Data/4state_entropy_raw.npy")[ns]
+	rules = np.load("Data/4state_ml_data.npy")[ns]
+	print(np.sum(rules[:,1]==1))
+	entropy_fit(e_data,rules[:,0],rules[:,1])
+	"""
+
+
+
+
+
+
+
+
+
+
+
+def mean_field(i,N):
+	#Uses transition matrix as mean field approximation
+	rule = np.load("Data/8state_rules_sp_combined.npy")[i,2:]
+	g.rule = rule
 	g.run()
-	data = g.im_out()
 	ani_display()
-	print(g.get_metrics(4))
-	"""
+	tmat = np.load("Data/8state_transition_matrices.npy")[i]
+	sim = np.ones((N,8))/float(8)
+	#sim[0] = 1/float(N)
+	plt.matshow(tmat)
+	plt.show()
+	for n in range(N-1):
+		sim[n+1]=np.einsum("ij,i",tmat,sim[n])
+	plt.matshow(sim)
+	plt.colorbar()
+	plt.show()
 
 
 
-
-	#plt.scatter(e_fit[rules[:,1]==0],l_fit[rules[:,1]==0,1],color="red")
-	#plt.scatter(e_fit[rules[:,1]==1],l_fit[rules[:,1]==1,1],color="blue")
-	#for i in range(512):
-	#	if rules[i,1]==0:
-	#		plt.plot(lyap_data[0,i],color="red",alpha=0.2)
-	#	if rules[i,1]==1:
-	#		plt.plot(lyap_data[0,i],color="blue",alpha=0.2)
-	#plt.plot([0],[0],color="red",label="boring")
-	#plt.plot([0],[0],color="blue",label="interesting")
-	#plt.legend()
-	#plt.title("Divergence with binary classifier (512 2 state rules)")
-	#plt.xlabel("Timesteps")
-	#plt.ylabel("Divergence (normalised between 0-1)")
-	#plt.show()
-	
-	#lyap_fit(lyap_data,rules[:,0],rules[:,1])
-	
-	#ent_data = entropy_evaluate(rules[:,0],rules[:,1],rules[:,2:],32)
-	#np.save("random_walk_gol_entropy_N32_I256.npy",ent_data)
-	
-	#np.save("random_walk_gol_lya_div_N32_I128.npy",lyap_data)
-
-
-	#rules = random_explore(16)
-	#np.save("3state_test_rules",rules)
-	#lyap_data= lyap_evaluate(rules[:,0],rules[:,1],rules[:,2:],4,norm=True)
 
 
 def old_load():
@@ -256,11 +275,12 @@ def generate_observables(N,rules):
 	e_data = np.zeros((R,512))
 	l_data = np.zeros((R,g.size//2))
 	stat_struct = np.zeros((R,g.states,g.size,g.size)).astype("complex")
+	mf_err = np.zeros((R,512))
 	for i in range(R):
 		g.rule = rules[i,2:]
 		observables[i,0] = rules[i,0] #wolfram class label
 		observables[i,1] = rules[i,1] #is interesting label
-		observables[i,2:],mats[i],e_data[i],l_data[i],stat_struct[i] = g.get_metrics(N)
+		observables[i,2:],mats[i],e_data[i],l_data[i],stat_struct[i],mf_err[i] = g.get_metrics(N)
 		sys.stdout.write("#")
 		sys.stdout.flush()
 
@@ -269,6 +289,7 @@ def generate_observables(N,rules):
 	np.save(str(states)+"state_entropy_raw.npy",e_data)
 	np.save(str(states)+"state_divergence_raw.npy",l_data)
 	np.save(str(states)+"state_stationary_structures_raw.npy",stat_struct)
+	np.save(str(states)+"state_mean_field_error_raw.npy",mf_err)
 	
 	#observables = np.load("2state_ml_data.npy")
 	print(observables[0])
@@ -279,12 +300,13 @@ def generate_observables(N,rules):
 def generate_observables_2state(N=4):
 	#Loads and combines 2 state data sets and generates observables
 	
-	rules1 = np.load("random_2_state_rules.npy")
-	rules2 = np.load("random_walk_2_state_rules.npy")
-	rules3 = np.load("near_gol_ham_dist_2.npy")
-	rules4 = np.load("random_walk_gol_rules.npy")
+	rules1 = np.load("Data/random_2_state_rules.npy")
+	rules2 = np.load("Data/random_walk_2_state_rules.npy")
+	rules3 = np.load("Data/near_gol_ham_dist_2.npy")
+	rules4 = np.load("Data/random_walk_gol_rules.npy")
 
 	rules = np.vstack((rules1,rules2,rules3,rules4))
+	np.save("Data/2state_rules_combined",rules)
 	#print(rules[32])
 
 	
@@ -321,7 +343,7 @@ def plot_observables(a,b):
 			 "entropy_smooth","entropy_mean","entropy_variance","rule_entropy",
 			 "fft_symmetry","spacial_first_peak_mean","spacial_first_peak_var","spacial_second_peak_mean","spacial_second_peak_var",
 			 "temporal_first_peak_mean","temporal_first_peak_var","temporal_second_peak_mean","temporal_second_peak_var"]
-	observables = np.load("2state_ml_data.npy")
+	observables = np.load("Data/8state_ml_data.npy")
 	plt.scatter(observables[observables[:,1]==0,2+a],observables[observables[:,1]==0,2+b],color="red",label="boring")
 	plt.scatter(observables[observables[:,1]==1,2+a],observables[observables[:,1]==1,2+b],color="blue",label="interesting")
 	plt.legend()
@@ -715,17 +737,17 @@ def entropy_fit(data,wclass,is_interesting):
 	
 	#Plot all entropy data
 	ts = np.arange(data.shape[1])
-	plt.plot(ts,data[is_interesting==0].T,color="red",alpha=0.2)
-	plt.plot(ts,data[is_interesting==1].T,color="blue",alpha=0.2)
-	plt.plot([0],[0],color="red",label="boring")
-	plt.plot([0],[0],color="blue",label="interesting")
-	plt.title("Entropy with binary classifier (512 2 state rules)")
-	plt.xlabel("Timesteps")
-	plt.ylabel("Entropy (normalised between 0-1)")
-	plt.legend()
-	plt.show()
+	fig,ax = plt.subplots(2,1,sharex=True)
+	ax[0].plot(ts,data[is_interesting==0].T,color="red",alpha=0.1)
+	ax[0].plot(ts,data[is_interesting==1].T,color="blue",alpha=0.1)
+	ax[0].plot([0],[0],color="red",label="boring")
+	ax[0].plot([0],[0],color="blue",label="interesting")
+	#ax[0].set_title("Entropy with binary classifier (2 state rules)")
+	ax[0].set_ylabel("Entropy")
+	ax[0].legend()
+	#ax[0].show()
 	A=100
-	B=200
+	B=512-50
 	
 	
 	#mean absolute derivative of smoothed entropy
@@ -734,9 +756,11 @@ def entropy_fit(data,wclass,is_interesting):
 	for i in range(data.shape[0]):
 		data_sm[i] = np.diff(sp.signal.filtfilt(a,b,data[i]),prepend=0)
 		if is_interesting[i]==0:
-			plt.plot(ts[A:B],data_sm[i,A:B],color="red",alpha=0.5)
+			ax[1].plot(ts[A:B],np.abs(data_sm[i,A:B]),color="red",alpha=0.2)
 		elif is_interesting[i]==1:
-			plt.plot(ts[A:B],data_sm[i,A:B],color="blue",alpha=0.5)
+			ax[1].plot(ts[A:B],np.abs(data_sm[i,A:B]),color="blue",alpha=0.2)
+	ax[1].set_xlabel("Timesteps")
+	ax[1].set_ylabel("Smoothed variance")
 	plt.show()
 	m = np.zeros(data.shape[0])
 	for i in range(data.shape[0]):
