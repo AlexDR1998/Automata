@@ -60,26 +60,27 @@ def main():
 	#data = smooth_perm_explore(32)
 	#np.save("4state_rules_sp_32_16",data)
 	
-	"""
-	r1 = np.load("Data/8state_rules_sp_32_1.npy")
-	r2 = np.load("Data/8state_rules_sp_32_2.npy")
-	r3 = np.load("Data/8state_rules_sp_32_3.npy")
-	r4 = np.load("Data/8state_rules_sp_32_4.npy")
-	r5 = np.load("Data/8state_rules_sp_32_5.npy")
-	r6 = np.load("Data/8state_rules_sp_32_6.npy")
-	r7 = np.load("Data/8state_rules_sp_32_7.npy")
-	r8 = np.load("Data/8state_rules_sp_32_8.npy")
-	r9 = np.load("Data/8state_rules_sp_32_9.npy")
-	r10 = np.load("Data/8state_rules_sp_32_10.npy")
-	r11 = np.load("Data/8state_rules_sp_32_11.npy")
-	r12 = np.load("Data/8state_rules_sp_32_12.npy")
-	r13 = np.load("Data/8state_rules_sp_32_13.npy")
-	r14 = np.load("Data/8state_rules_sp_32_14.npy")
-	r15 = np.load("Data/8state_rules_sp_32_15.npy")
-	r16 = np.load("Data/8state_rules_sp_32_16.npy")
+	
+	r1 = np.load("8state_rules_sp_32_1.npy")
+	r2 = np.load("8state_rules_sp_32_2.npy")
+	r3 = np.load("8state_rules_sp_32_3.npy")
+	r4 = np.load("8state_rules_sp_32_4.npy")
+	r5 = np.load("8state_rules_sp_32_5.npy")
+	r6 = np.load("8state_rules_sp_32_6.npy")
+	r7 = np.load("8state_rules_sp_32_7.npy")
+	r8 = np.load("8state_rules_sp_32_8.npy")
+	r9 = np.load("8state_rules_sp_32_9.npy")
+	r10 = np.load("8state_rules_sp_32_10.npy")
+	r11 = np.load("8state_rules_sp_32_11.npy")
+	r12 = np.load("8state_rules_sp_32_12.npy")
+	r13 = np.load("8state_rules_sp_32_13.npy")
+	r14 = np.load("8state_rules_sp_32_14.npy")
+	r15 = np.load("8state_rules_sp_32_15.npy")
+	r16 = np.load("8state_rules_sp_32_16.npy")
 	rules = np.vstack((r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16))
 	print(rules.shape)
-	"""
+	generate_observables(4,rules)
+	
 	#np.save("Data/8state_rules_sp_combined",rules)
 	
 
@@ -124,8 +125,7 @@ def main():
 
 	#print(rules.shape)
 	#print(rules[1])
-	rules = np.load("8state_rules_sp_combined.npy")
-	generate_observables(4,rules)
+	#rules = np.load("8state_rules_sp_combined.npy")
 	
 	#plot_observables(3,7)
 	

@@ -759,7 +759,7 @@ class Grid2D(object):
         self.max_iters = 512
         self.image = np.zeros((self.max_iters,self.size,self.size))
         #do first as self.tmat is needed for lyapunov divergence
-        _,mf_err_mean,mf_err_var,mf_err = self.density_matrix(True,True)
+        tmat,mf_err_mean,mf_err_var,mf_err = self.density_matrix(True,True)
 
 
 
@@ -810,9 +810,6 @@ class Grid2D(object):
 
 
 
-        #--- Transition matrix
-
-        mat = self.density_matrix()
 
 
         metrics = np.array([l_params[0],l_params[1],l_params[2],
@@ -827,7 +824,7 @@ class Grid2D(object):
 
         #Sometimes std for small number of states makes NaN - set these to 0
         metrics[np.isnan(metrics)]=0
-        return metrics,mat,e_data,l_data,stat_struct,mf_err
+        return metrics,tmat,e_data,l_data,stat_struct,mf_err
 
 
         #plt.plot(l_data)
