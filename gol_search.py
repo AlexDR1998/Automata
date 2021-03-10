@@ -26,7 +26,7 @@ def main():
 	np.seterr("ignore")
 	global states
 	global symm
-	states = 4
+	states = 2
 	symm = 2
 	neighbours = 1
 	global size
@@ -87,7 +87,7 @@ def main():
 	#print(data.shape)
 
 
-	rules = np.load("Data/4state_rules_sp_combined.npy")
+	rules = np.load("Data/2state_rules_sp_combined.npy")
 	generate_observables(4,rules)
 
 
