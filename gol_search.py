@@ -1,4 +1,4 @@
-from org import Grid2D
+from automata_class import Grid2D
 import numpy as np
 from scipy import ndimage
 import scipy as sp
@@ -87,8 +87,8 @@ def main():
 	#print(data.shape)
 
 
-	rules = np.load("Data/2state_rules_combined.npy")
-	generate_observables(4,rules)
+	###rules = np.load("Data/2state_rules_combined.npy")
+	###generate_observables(4,rules)
 
 
 
@@ -139,25 +139,23 @@ def main():
 
 	
 	#--- Plotting stuff for report
-	"""
-	ns = np.random.choice(512,size=128)
-	l_data = np.load("8state_divergence_raw.npy")[ns]
-	rules = np.load("8state_ml_data.npy")[ns]
+	
+	#ns = np.random.choice(512,size=128)
+	#l_data = np.load("4state_divergence_raw.npy")[ns]
 	#print(np.sum(rules[:,1]==1))
-	lyap_fit(l_data,rules[:,0],rules[:,1])
+	#lyap_fit(l_data,rules[:,0],rules[:,1])
 
 
-	#l_data = np.load("Data/4state_divergence_raw.npy")#[ns]
-	#rules = np.load("Data/4state_ml_data.npy")#[ns]
+	#l_data = np.load("4state_divergence_raw.npy")[ns]
+	#rules = np.load("4state_ml_data.npy")[ns]
 	#print(np.sum(rules[:,1]==1))
 	#lyap_fit(l_data,rules[:,0],rules[:,1])
 	
-	mf_err = np.load("8state_mean_field_error_raw.npy")[ns]
-	mf_error_plot(mf_err,rules[:,1])
-	"""
-	#plot_observables(16,17)
-
-
+	
+	plot_observables(1,4)
+	plot_observables(7,16)
+	plot_observables(1,7)
+	plot_observables(7,4)
 
 
 
@@ -340,14 +338,14 @@ def plot_observables(a,b):
 	"""
 
 
-	names = ["divergence_prefactor","divergence_exponent","divergence_offset",
-			 "entropy_smooth","entropy_mean","entropy_variance","rule_entropy",
-			 "fft_symmetry","spacial_first_peak_mean","spacial_first_peak_var","spacial_second_peak_mean","spacial_second_peak_var",
-			 "temporal_first_peak_mean","temporal_first_peak_var","temporal_second_peak_mean","temporal_second_peak_var",
-			 "transition_matrix_approximation_error_mean","transition_matrix_approximation_error_var"]
-	observables = np.load("8state_ml_data.npy")
-	plt.scatter(observables[observables[:,1]==0,2+a],observables[observables[:,1]==0,2+b],color="red",label="boring")
-	plt.scatter(observables[observables[:,1]==1,2+a],observables[observables[:,1]==1,2+b],color="blue",label="interesting")
+	names = ["Divergence prefactor","Divergence exponent","Divergence offset",
+			 "Entropy smooth","Entropy mean","Entropy variance","Rule entropy",
+			 "fft symmetry","Spacial first peak_mean","Spacial first peak var","Spacial second peak mean","Spacial second peak var",
+			 "Temporal first peak mean","Temporal first peak var","Temporal second peak mean","Temporal second peak var",
+			 "Transition matrix approximation error mean","Transition matrix approximation error var"]
+	observables = np.vstack((np.load("8state_ml_data.npy"),np.load("4state_ml_data.npy"),np.load("2state_ml_data.npy")))
+	plt.scatter(observables[observables[:,1]==0,2+a],observables[observables[:,1]==0,2+b],color="red",label="boring",alpha=0.5)
+	plt.scatter(observables[observables[:,1]==1,2+a],observables[observables[:,1]==1,2+b],color="blue",label="interesting",alpha=0.5)
 	plt.legend()
 	plt.xlabel(names[a])
 	plt.ylabel(names[b])
@@ -753,6 +751,9 @@ def mf_error_plot(data,is_interesting):
 	plt.plot(ts,data[is_interesting==1].T,color="blue",alpha=0.1)
 	plt.plot([0],[0],color="red",label="boring")
 	plt.plot([0],[0],color="blue",label="interesting")
+	plt.legend()
+	plt.xlabel("Timesteps")
+	plt.ylabel("Approximation Error")
 	plt.show()
 
 def entropy_fit(data,wclass,is_interesting):
