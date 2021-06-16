@@ -1,4 +1,4 @@
-from org import Grid2D
+from automata_class import Grid2D
 import numpy as np
 import math
 #import scipy as sp 
@@ -19,11 +19,13 @@ iterations = 128
 try:
 	os.mkdir(str(states)+"_state_results")
 except OSError:
-	print("Failed to creat directory")
+	print("Failed to create directory")
 
 
 g = Grid2D(size,0.5,states,1,iterations,1)
-rules = np.random.randint(states,size=(N_rules,g.rule_length))
+rng = np.random.RandomState(instance)
+rules = rng.randint(states,size=(N_rules,g.rule_length))
+print(rules)
 observables = np.zeros((N_rules,18))
 mats = np.zeros((N_rules,states,states))
 e_data = np.zeros((N_rules,512))
@@ -38,7 +40,7 @@ for i in range(N_rules):
 
 np.save(str(states)+"_state_results/observables"+str(instance)+".npy",observables)
 np.save(str(states)+"_state_results/transition_mats"+str(instance)+".npy",mats)
-np.save(str(states)+"_state_results/rules"+str(instance)+".npy",rules)
+#np.save(str(states)+"_state_results/rules"+str(instance)+".npy",rules)
 np.save(str(states)+"_state_results/raw_entropy"+str(instance)+".npy",e_data)
 np.save(str(states)+"_state_results/raw_lyap"+str(instance)+".npy",l_data)
 np.save(str(states)+"_state_results/raw_mf_err"+str(instance)+".npy",mf_err)

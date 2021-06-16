@@ -1,4 +1,4 @@
-from org import Grid2D
+from automata_class import Grid2D
 import numpy as np
 import math
 #import scipy as sp 
@@ -19,7 +19,7 @@ iterations = 128
 try:
 	os.mkdir(str(states)+"_state_binomial_results")
 except OSError:
-	print("Failed to creat directory")
+	print("Failed to create directory")
 
 
 g = Grid2D(size,0.5,states,1,iterations,1)
@@ -28,10 +28,11 @@ splits=100
 K = N_rules//splits
 ps = np.linspace(0,1,K+2)[1:-1]
 _rules = np.zeros((K,splits,g.rule_length)).astype(int)
+rng = np.random.RandomState(instance)
 for k in range(K):
-	_rules[k] = np.random.binomial(states-1,ps[k],size=(splits,g.rule_length))
+	_rules[k] = rng.binomial(states-1,ps[k],size=(splits,g.rule_length))
 rules = _rules.reshape((N_rules,g.rule_length))
-
+print(rules)
 
 
 observables = np.zeros((N_rules,18))
@@ -48,7 +49,7 @@ for i in range(N_rules):
 
 np.save(str(states)+"_state_results/observables"+str(instance)+".npy",observables)
 np.save(str(states)+"_state_results/transition_mats"+str(instance)+".npy",mats)
-np.save(str(states)+"_state_results/rules"+str(instance)+".npy",rules)
+#np.save(str(states)+"_state_results/rules"+str(instance)+".npy",rules)
 np.save(str(states)+"_state_results/raw_entropy"+str(instance)+".npy",e_data)
 np.save(str(states)+"_state_results/raw_lyap"+str(instance)+".npy",l_data)
 np.save(str(states)+"_state_results/raw_mf_err"+str(instance)+".npy",mf_err)
