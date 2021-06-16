@@ -2,7 +2,7 @@ import numpy as np
 from scipy import signal
 from scipy import ndimage
 import scipy as sp 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import math
 import sys
 import itertools
@@ -26,7 +26,7 @@ class Grid2D(object):
            [3]
 
     """
-    
+
 
     def __init__(self,size,density,states,nsize,iterations,symmetries=1):
         
