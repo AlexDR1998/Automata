@@ -1,0 +1,16 @@
+========================================================
+This program generates and displays 2D cellular automata
+See user guide for more detailed explanations 
+
+Enter	-- Generate and run new random rule
+r 	-- Run current rule from new initial condition
+c 	-- Run current rule from end of last simulation
+p	-- Perturb current rule and generate animation
+m	-- Choose from 4 mutations of current rule
+s	-- Smooth current rule
+x	-- Shuffle current rule
+z	-- Roll current rule
+q	-- Quit
+h	-- Help
+
+========================================================

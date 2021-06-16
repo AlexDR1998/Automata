@@ -1,16 +1,35 @@
-======================================================
-This program uses cellular automata to generate images
+========================================================
+This program generates and displays 2D cellular automata
+See user guide for more detailed explanations 
 
-Enter	-- Generate animation from a new rule
-r 	-- Generate animation from current rule
+Enter	-- Generate and run new random rule
+r 	-- Run current rule from new initial condition
+c 	-- Run current rule from end of last simulation
 s 	-- Save current rule
 l	-- Load rule and generate animation
-n	-- List saved rules
-p	-- Modify current rule and generate animation
-+,-,*	-- Element-wise arithmetic on 2 rules
-m 	-- Element-wise mean of 2 rules
-z	-- Zip 2 rules together
-q	-- Quit
-h	-- Help
+g 	-- Change rule generation method
+sm 	-- Change parameters for rule generation
 
-======================================================
++,-,*	-- Element-wise arithmetic on 2 rules
+a 	-- Element-wise average of 2 rules
+z	-- Zip 2 rules together
+b 	-- Splice 2 rules together
+
+p	-- Perturb current rule and generate animation
+m	-- Choose from 4 mutations of current rule
+x	-- Shuffle current rule
+v	-- Roll current rule
+w 	-- Smooth current rule
+i 	-- Invert current rule
+
+sm	-- Gaussian blur of simulation
+t 	-- Transpose output
+fft	-- Display FFT of simulation
+2d 	-- Display sum along given axis
+stat	-- Display stationary slices
+
+info	-- Displays how many possible rules there are
+q	-- Quit
+h	-- Display this help message
+
+========================================================
