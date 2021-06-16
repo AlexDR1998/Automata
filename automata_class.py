@@ -26,6 +26,7 @@ class Grid2D(object):
            [3]
 
     """
+    
 
     def __init__(self,size,density,states,nsize,iterations,symmetries=1):
         
