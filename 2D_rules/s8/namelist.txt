@@ -3,3 +3,16 @@ blinker1
 lines1
 diamond1
 boring_noise
+flash_demix
+grid1
+glider1
+grid2
+lines2
+diagonal1
+symmetric
+grid3
+blinky
+rings
+block_rep
+slow_decay
+boring_steady
