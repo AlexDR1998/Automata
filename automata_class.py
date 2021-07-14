@@ -911,6 +911,7 @@ class Grid2D(object):
             obs_history[l],tmat_history[l],_,_,_,_ = self.get_metrics(N)
             rule_history[l] = self.rule
             self.rule_perm(am)
+            
         #print(obs_history)
         return obs_history,rule_history,tmat_history
 #--- Rule generation, manipulation, saving and loading
