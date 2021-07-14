@@ -899,7 +899,20 @@ class Grid2D(object):
         return r_history,p_history
         #self.run()
 
+
     """
+    def random_walk(self,L,am,N=1):
+        #Performs a random walk of length L, where each step changes am*Rule_length array entries. Computes and stores observables of each step
+        #initial_metric = self.get_metrics(N)
+        obs_history = np.zeros((L,18))
+        tmat_history = np.zeros((L,self.states,self.states))
+        rule_history = np.zeros((L,self.rule_length))
+        for l in range(L):
+            obs_history[l],tmat_history[l],_,_,_,_ = self.get_metrics(N)
+            rule_history[l] = self.rule
+            self.rule_perm(am)
+        #print(obs_history)
+        return obs_history,rule_history,tmat_history
 #--- Rule generation, manipulation, saving and loading
 
     def rule_gen(self,mu=0.5,sig=0.25):
@@ -971,7 +984,7 @@ class Grid2D(object):
         """
         self.rule = rule_in
 
-    def rule_perm(self):
+    def rule_perm(self,am=0.05):
         """
         method to slightly modify a rule
         """
@@ -984,7 +997,7 @@ class Grid2D(object):
 
         #self.rule[0]=0
         L = self.rule.shape[0]
-        k=L//20
+        k=int(L*am)
         ii = np.random.choice(L,size=k,replace=False)
         self.rule[ii] = (self.rule[ii]+np.random.randint(1,self.states,size=k))%self.states
 
