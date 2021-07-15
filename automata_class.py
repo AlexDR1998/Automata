@@ -10,7 +10,7 @@ import itertools
 #import h5py
 #import tensorflow as tf 
 #from tensorflow import keras
-
+from tqdm import tqdm
 
 
 
@@ -907,11 +907,11 @@ class Grid2D(object):
         obs_history = np.zeros((L,18))
         tmat_history = np.zeros((L,self.states,self.states))
         rule_history = np.zeros((L,self.rule_length))
-        for l in range(L):
+        for l in tqdm(range(L)):
             obs_history[l],tmat_history[l],_,_,_,_ = self.get_metrics(N)
             rule_history[l] = self.rule
             self.rule_perm(am)
-            
+
         #print(obs_history)
         return obs_history,rule_history,tmat_history
 #--- Rule generation, manipulation, saving and loading
@@ -998,7 +998,7 @@ class Grid2D(object):
 
         #self.rule[0]=0
         L = self.rule.shape[0]
-        k=int(L*am)
+        k=max(int(L*am),1)
         ii = np.random.choice(L,size=k,replace=False)
         self.rule[ii] = (self.rule[ii]+np.random.randint(1,self.states,size=k))%self.states
 

@@ -25,7 +25,7 @@ print("Running "+str(states)+" state rules instance "+str(instance))
 g = Grid2D(size,0.5,states,1,iterations,1)
 g.rule_mode=1
 g.rule_gen()
-observables,rules,mats = g.random_walk(N_rules,0.005,N_obs_reps)
+observables,rules,mats = g.random_walk(N_rules,0.001,N_obs_reps)
 rules = rules.astype(int)
 
 #print(observables)
