@@ -10,7 +10,7 @@ import itertools
 #import h5py
 #import tensorflow as tf 
 #from tensorflow import keras
-from tqdm import tqdm
+
 
 
 
@@ -744,7 +744,7 @@ class Grid2D(object):
         ts = np.arange(l_data.shape[0])
         try:
             #Include try/except as curve_fit occasionally fails to find optimal parameters and then crashes
-            l_params,_ = sp.optimize.curve_fit(power_law,ts,l_data)    
+            l_params,_ = sp.optimize.curve_fit(power_law,ts,l_data,p0=[0.1,1.0,0.01])    
         except RuntimeError:
             l_params = np.zeros(3)
 
@@ -907,7 +907,7 @@ class Grid2D(object):
         obs_history = np.zeros((L,18))
         tmat_history = np.zeros((L,self.states,self.states))
         rule_history = np.zeros((L,self.rule_length))
-        for l in tqdm(range(L)):
+        for l in range(L):
             obs_history[l],tmat_history[l],_,_,_,_ = self.get_metrics(N)
             rule_history[l] = self.rule
             self.rule_perm(am)
