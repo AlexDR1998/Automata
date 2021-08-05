@@ -47,9 +47,9 @@ for i in range(N_rules):
 
 
 
-np.save(str(states)+"_state_results/observables"+str(instance)+".npy",observables)
-np.save(str(states)+"_state_results/transition_mats"+str(instance)+".npy",mats)
+np.save(str(states)+"_state_binomial_results/observables"+str(instance)+".npy",observables)
+np.save(str(states)+"_state_binomial_results/transition_mats"+str(instance)+".npy",mats)
 #np.save(str(states)+"_state_results/rules"+str(instance)+".npy",rules)
-np.save(str(states)+"_state_results/raw_entropy"+str(instance)+".npy",e_data)
-np.save(str(states)+"_state_results/raw_lyap"+str(instance)+".npy",l_data)
-np.save(str(states)+"_state_results/raw_mf_err"+str(instance)+".npy",mf_err)
+#np.save(str(states)+"_state_results/raw_entropy"+str(instance)+".npy",e_data)
+#np.save(str(states)+"_state_results/raw_lyap"+str(instance)+".npy",l_data)
+#np.save(str(states)+"_state_results/raw_mf_err"+str(instance)+".npy",mf_err)
