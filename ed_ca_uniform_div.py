@@ -1,0 +1,47 @@
+from automata_class import Grid2D
+import numpy as np
+import math
+#import scipy as sp 
+#from scipy import signal
+#from scipy import ndimage
+import sys
+import os
+#import itertools
+
+	
+N_rules=1000
+N_obs_reps = 4
+states = int(sys.argv[1])
+instance = int(sys.argv[2])
+size = 128
+iterations = 128
+
+try:
+	os.mkdir(str(states)+"_state_results")
+except OSError:
+	print("Failed to create directory")
+
+
+g = Grid2D(size,0.5,states,1,iterations,1)
+rng = np.random.RandomState(instance)
+rules = rng.randint(states,size=(N_rules,g.rule_length))
+print(rules)
+divergence = np.zeros((N_rules,3))
+mats = np.zeros((N_rules,states,states))
+e_data = np.zeros((N_rules,512))
+l_data = np.zeros((N_rules,g.size//2))
+mf_err = np.zeros((N_rules,512))
+for i in range(N_rules):
+	print(i)
+	g.rule = rules[i]
+	divergence[i] = g.fit_lyap(N)
+
+
+
+#np.save(str(states)+"_state_results/observables"+str(instance)+".npy",observables)
+#np.save(str(states)+"_state_results/transition_mats"+str(instance)+".npy",mats)
+#np.save(str(states)+"_state_results/rules"+str(instance)+".npy",rules)
+#np.save(str(states)+"_state_results/raw_entropy"+str(instance)+".npy",e_data)
+#np.save(str(states)+"_state_results/raw_lyap"+str(instance)+".npy",l_data)
+#np.save(str(states)+"_state_results/raw_mf_err"+str(instance)+".npy",mf_err)
+np.save(str(states)+"_state_results/lyap_divergence"+str(instance)+".npy",divergence)

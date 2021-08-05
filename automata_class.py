@@ -711,13 +711,41 @@ class Grid2D(object):
         #print(p)
         #print(self.rule)
 
+
+    def fit_lyap(self,N):
+        temp_iters = self.max_iters
+
+        #--- transition matrix meanf field approximation
+
+        #set simulation size - longer runtime gives more strongly converged tmat
+        self.max_iters = 512
+        self.image = np.zeros((self.max_iters,self.size,self.size))
+        #do first as self.tmat is needed for lyapunov divergence
+        tmat,mf_err_mean,mf_err_var,mf_err = self.density_matrix(True,True)
+
+
+        #---  Divergence
+        
+        #set simulation size - smaller runtime avoids PBC effects
+        self.max_iters = self.size//2
+        self.image = np.zeros((self.max_iters,self.size,self.size))
+        
+        #Run divergence data simulations and fit to power law
+        l_data = np.mean(self.lyap(4*N,norm=True),axis=0)#[:self.size//2]
+        ts = np.arange(l_data.shape[0])
+        try:
+            #Include try/except as curve_fit occasionally fails to find optimal parameters and then crashes
+            l_params,_ = sp.optimize.curve_fit(power_law,ts,l_data,p0=[0.1,1.0,0.01])    
+        except RuntimeError:
+            l_params = np.zeros(3)
+        return l_params
+
     def get_metrics(self,N):
         #Calculates and returns all the useful metrics for a rule (rule entropy, variation of simulation entropy, divergence powerlaw)
         #N denotes number of repeated simulations to average over
 
         #sys.stdout.write("||")
-        #sys.stdout.flush()
-
+        #sys.stdout.flush
         temp_iters = self.max_iters
 
         
