@@ -1,3 +1,5 @@
+#import os
+#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import numpy as np
 from scipy import signal
 from scipy import ndimage
@@ -8,7 +10,7 @@ import sys
 import itertools
 #from sklearn import neighbors
 #import h5py
-#import tensorflow as tf 
+import tensorflow as tf 
 #from tensorflow import keras
 
 
@@ -830,14 +832,14 @@ class Grid2D(object):
 
 
     #Commented out because cplab doesn't have tensorflow
-    """
+    
     def predict_interesting(self,N=1):
         #Runs get_metrics on current rule, then feeds output to trained neural network
         model = tf.keras.models.load_model('interesting_predictor.h5',compile=False)
-        metrics = self.get_metrics(N)[0]
+        metrics,tmats,_,_,_,_ = self.get_metrics(N)
         metrics = metrics.reshape((1,metrics.shape[0]))
         #print(metrics)
-        return model.predict(metrics),metrics
+        return model.predict(metrics),metrics,tmats
     
 
 
@@ -928,7 +930,7 @@ class Grid2D(object):
         #self.run()
 
 
-    """
+    
     def random_walk(self,L,am,N=1):
         #Performs a random walk of length L, where each step changes am*Rule_length array entries. Computes and stores observables of each step
         #initial_metric = self.get_metrics(N)
@@ -942,6 +944,60 @@ class Grid2D(object):
 
         #print(obs_history)
         return obs_history,rule_history,tmat_history
+
+
+    def monte_carlo(self,B,L,am,N=1):
+        #B is thermodynamic beta (1/kT), L is the length of the guided random walk
+        obs_history = np.zeros((L,18))
+        tmat_history = np.zeros((L,self.states,self.states))
+        rule_history = np.zeros((L,self.rule_length)).astype(int)
+        ps = np.zeros(L)
+        
+        self.rule_mode=1
+        self.rule_gen(mu=0.2)
+
+        ps[0],obs_history[0],tmat_history[0] = self.predict_interesting(N)
+        rule_history[0] = self.rule
+        l = 1
+        count = 0
+        #if small jumps repeatedly fail to be accepted, gradually increase jump size
+        persistance = 0
+        while l < L:
+            current_rule = self.rule[:]
+            #jump_size = min(am+persistance*0.01,1)
+            self.rule_perm(am)
+            ps[l],obs_history[l],tmat_history[l] = self.predict_interesting(N)
+            dp = ps[l]-ps[l-1]
+            r = np.random.uniform()
+            if r<np.exp(dp*B):
+                #update rule - either is interesting or r is big enough
+                persistance=0                
+                print("dp = "+str(dp)+", p = "+str(ps[l])+", updating rule. Step "+str(l))
+                rule_history[l]=self.rule
+                l+=1
+            
+            else:
+                #don't change rule, retry random perturbation
+                persistance+=1
+                print("dp = "+str(dp)+", rule unchanged")
+                self.rule = current_rule[:]
+            if persistance==32:
+                #if a rule has not changed after 32 tries, it's probably stuck
+                print("rule stuck for "+str(persistance)+" steps, breaking loop")
+                ps[:l]=ps[l-1]
+                obs_history[:l]=obs_history[l-1]
+                tmat_history[:l]=tmat_history[l-1]
+                rule_history[:l]=rule_history[l-1]
+
+                break
+        return ps,obs_history,rule_history,tmat_history
+            
+
+
+
+            
+
+
 #--- Rule generation, manipulation, saving and loading
 
     def rule_gen(self,mu=0.5,sig=0.25):
