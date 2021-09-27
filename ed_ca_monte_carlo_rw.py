@@ -11,7 +11,7 @@ import os
 	
 N_rules=100
 N_obs_reps = 4
-B = 1000
+B = 500
 states = int(sys.argv[1])
 instance = int(sys.argv[2])
 size = 128
@@ -26,11 +26,12 @@ print("Running "+str(states)+" state rules instance "+str(instance))
 g = Grid2D(size,0.5,states,1,iterations,1)
 g.rule_mode=1
 g.rule_gen(mu=0.3)
-_,observables,rules,mats = g.monte_carlo(B,N_rules,0.01,N_obs_reps)
+ps,observables,rules,mats,acceptance_rate = g.monte_carlo(B,N_rules,0.01,N_obs_reps)
 rules = rules.astype(int)
 
 #print(observables)
-
-np.save(str(states)+"_state_mc_results/observables"+str(instance)+".npy",observables)
-np.save(str(states)+"_state_mc_results/transition_mats"+str(instance)+".npy",mats)
-np.save(str(states)+"_state_mc_results/rules"+str(instance)+".npy",rules)
+np.save(str(states)+"_state_B"+str(B)+"_mc_results/acceptance_rate"+str(instance)+".npy",acceptance_rate)
+np.save(str(states)+"_state_B"+str(B)+"_mc_results/predictions"+str(instance)+".npy",ps)
+np.save(str(states)+"_state_B"+str(B)+"_mc_results/observables"+str(instance)+".npy",observables)
+np.save(str(states)+"_state_B"+str(B)+"_mc_results/transition_mats"+str(instance)+".npy",mats)
+np.save(str(states)+"_state_B"+str(B)+"_mc_results/rules"+str(instance)+".npy",rules)
