@@ -993,11 +993,28 @@ class Grid2D(object):
         return ps,obs_history,rule_history,tmat_history
             
 
+    """
+    def genetic_algorithm(self,I,K,mutatation,N_rules):
+        self.rule_mode=1
+        all_rules = np.zeros((I,N_rules,self.rule_length)).astype(int)
+        all_observables = np.zeros((I,N_rules,18))
+        all_preds = np.zeros((I,N_rules,))
+        #initialise rules
+        for r in range(N_rules):
+            self.rule_gen()
+            all_rules[0,r] = self.rule
+            all_preds[0,r],all_observables[0,r],_ = self.predict_interesting()
+        for i in range(1,I):
+            ps = all_preds[i-1]/np.sum(all_preds[i-1])
+            max_k = np.random.choice(N_rules,K,p=ps,replace=False)
+            best_rules = all_rules[i-1,max_k]
+            best_preds = all_predictions[i-1,max_k]
+            best_obs = all_obs[i-1,max_k]
 
-
-            
-
-
+            not_best_rules = np.delete(all_rules[i-1],max_k,axis=0)
+            not_best_preds = np.delete(all_predictions[i-1],max_k,axis=0)
+            not_best_obs = np.delete(all_obs[i-1],max_k,axis=0)
+    """
 #--- Rule generation, manipulation, saving and loading
 
     def rule_gen(self,mu=0.5,sig=0.25):
