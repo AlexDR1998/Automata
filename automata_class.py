@@ -962,7 +962,9 @@ class Grid2D(object):
         count = 0
         #if small jumps repeatedly fail to be accepted, gradually increase jump size
         persistance = 0
+        acceptance_rate = 0.0
         while l < L:
+            count+=1
             current_rule = self.rule[:]
             #jump_size = min(am+persistance*0.01,1)
             self.rule_perm(am)
@@ -970,12 +972,15 @@ class Grid2D(object):
             dp = ps[l]-ps[l-1]
             r = np.random.uniform()
             if r<np.exp(dp*B):
-                #update rule - either is interesting or r is big enough
+                #update rule - either is more interesting (dp>0) or r is big enough
                 persistance=0                
                 print("dp = "+str(dp)+", p = "+str(ps[l])+", updating rule. Step "+str(l))
                 rule_history[l]=self.rule
                 l+=1
-            
+                if dp<0:
+                    #count how many times a less interesting update is accepted
+                    acceptance_rate+=1
+
             else:
                 #don't change rule, retry random perturbation
                 persistance+=1
@@ -990,7 +995,9 @@ class Grid2D(object):
                 rule_history[:l]=rule_history[l-1]
 
                 break
-        return ps,obs_history,rule_history,tmat_history
+                
+        acceptance_rate = acceptance_rate/float(count)
+        return ps,obs_history,rule_history,tmat_history,acceptance_rate
             
 
     """

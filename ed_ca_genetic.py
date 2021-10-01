@@ -38,7 +38,7 @@ def main():
 
 
 	K=20 # number of rules from breeding pool
-	I=50 # number of iterations
+	I=100 # number of iterations
 	N_rules = 100 # number of rules per generation
 	mutation = 0.02 # chance of random mutations being applied
 
