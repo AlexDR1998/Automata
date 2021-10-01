@@ -11,11 +11,12 @@ import itertools
 #from sklearn import neighbors
 #import h5py
 import tensorflow as tf 
+#from numba.experimental import jitclass
 #from tensorflow import keras
 
 
 
-
+#@jitclass
 class Grid2D(object):
 
     """
@@ -28,7 +29,6 @@ class Grid2D(object):
            [3]
 
     """
-
 
     def __init__(self,size,density,states,nsize,iterations,symmetries=1):
         
@@ -176,7 +176,7 @@ class Grid2D(object):
             self.init_state = np.copy(self.current_state)
             #print(self.current_state)
 
-
+    #@jit()        
     def run_parallel(self,rule1,rule2,rule3,rule4):
         #Runs 4 rules, 1 in each quadrant. Used for graphing purposes
         self.init_grid()
@@ -196,6 +196,7 @@ class Grid2D(object):
             #self.current_state[self.size//2][:]=0
 
             self.image[i] = self.current_state
+    #@jit()
     def run_mutate(self,am=0.1):
         #Runs 4 rules in parallel, 1 on each corner.
         #Rules are mutated from initial rule
@@ -273,7 +274,7 @@ class Grid2D(object):
             self.rule=np.array(self.child4,copy=True)
 
 
-
+    #@jit(nopython=True,parallel=True)
     def update_grid(self,current_state,v):
         #returns the next state grid, same shape as current grid
         _exp = 9**current_state
@@ -284,7 +285,7 @@ class Grid2D(object):
         #print(key)
         return v(key)
 
-
+    #@jit()
     def run(self,random_init=True,compute_t_matrix=False):
         #initialises random starting state
         if random_init:
@@ -344,7 +345,7 @@ class Grid2D(object):
 
 #--- Automated analysis
 
-
+    #@jit(nopython=True)
     def density_matrix(self,random_init=True,check_accuracy=True):
 
         self.run(random_init,True)
@@ -374,7 +375,7 @@ class Grid2D(object):
             return (self.d,err_mean,err_var,err)
         else:
             return self.d
-
+    #@jit(nopython=True)
     def fft(self):
         #Performs fft of each state channel seperately and returns (symmetry, [spacial peaks], [temporal peaks])
 
@@ -633,7 +634,7 @@ class Grid2D(object):
         return (symmetry_coeff,spacial_peaks,temporal_peaks,fd[:,t0])
 
 
-
+    #@jit(nopython=True)
     def lyap(self,N,norm=False):
         #Run N simulations that differ by 1 cell in initial configuration from a given start state. Returns difference
         #If norm, then use transition matrix to weight differences between states
@@ -679,7 +680,7 @@ class Grid2D(object):
         #sys.stdout.flush()
         self.image = data1-data2
         return lyap_data
-
+    #@jit(nopython=True)
     def entropy(self,N=1):
         #Calculate information entropy at each timestep, repeats N times with different random initial conditions
         p = np.zeros((self.states,self.max_iters))
@@ -713,7 +714,7 @@ class Grid2D(object):
         #print(p)
         #print(self.rule)
 
-
+    #@jit(nopython=True)
     def fit_lyap(self,N):
         temp_iters = self.max_iters
 
@@ -741,7 +742,7 @@ class Grid2D(object):
         except RuntimeError:
             l_params = np.zeros(3)
         return l_params
-
+    #@jit(nopython=True)
     def get_metrics(self,N):
         #Calculates and returns all the useful metrics for a rule (rule entropy, variation of simulation entropy, divergence powerlaw)
         #N denotes number of repeated simulations to average over
@@ -995,7 +996,7 @@ class Grid2D(object):
                 rule_history[:l]=rule_history[l-1]
 
                 break
-                
+
         acceptance_rate = acceptance_rate/float(count)
         return ps,obs_history,rule_history,tmat_history,acceptance_rate
             
