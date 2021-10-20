@@ -947,7 +947,7 @@ class Grid2D(object):
         return obs_history,rule_history,tmat_history
 
 
-    def monte_carlo(self,B,L,am,N=1):
+    def monte_carlo(self,B,L,am,N=1,max_persistance=100):
         #B is thermodynamic beta (1/kT), L is the length of the guided random walk
         obs_history = np.zeros((L,18))
         tmat_history = np.zeros((L,self.states,self.states))
@@ -960,45 +960,59 @@ class Grid2D(object):
         ps[0],obs_history[0],tmat_history[0] = self.predict_interesting(N)
         rule_history[0] = self.rule
         l = 1
-        count = 0
+        jump_attempts = 0
+
         #if small jumps repeatedly fail to be accepted, gradually increase jump size
         persistance = 0
-        acceptance_rate = 0.0
+        false_acceptance_rate = 0
+        true_acceptance_rate = 0
+        rejection_rate = 0
         while l < L:
-            count+=1
+            jump_attempts+=1
             current_rule = self.rule[:]
             #jump_size = min(am+persistance*0.01,1)
             self.rule_perm(am)
             ps[l],obs_history[l],tmat_history[l] = self.predict_interesting(N)
             dp = ps[l]-ps[l-1]
             r = np.random.uniform()
+            
             if r<np.exp(dp*B):
                 #update rule - either is more interesting (dp>0) or r is big enough
+            
+
                 persistance=0                
                 print("dp = "+str(dp)+", p = "+str(ps[l])+", updating rule. Step "+str(l))
                 rule_history[l]=self.rule
                 l+=1
                 if dp<0:
                     #count how many times a less interesting update is accepted
-                    acceptance_rate+=1
-
+                    false_acceptance_rate+=1
+                else:
+                    #count how many times a more interesting update is accepted
+                    true_acceptance_rate+=1
             else:
                 #don't change rule, retry random perturbation
+                rejection_rate+=1
                 persistance+=1
                 print("dp = "+str(dp)+", rule unchanged")
                 self.rule = current_rule[:]
-            if persistance==32:
+            if persistance==max_persistance:
                 #if a rule has not changed after 32 tries, it's probably stuck
                 print("rule stuck for "+str(persistance)+" steps, breaking loop")
-                ps[:l]=ps[l-1]
-                obs_history[:l]=obs_history[l-1]
-                tmat_history[:l]=tmat_history[l-1]
-                rule_history[:l]=rule_history[l-1]
-
+                ps[l:]=ps[l-1]
+                obs_history[l:]=obs_history[l-1]
+                tmat_history[l:]=tmat_history[l-1]
+                rule_history[l:]=rule_history[l-1]
                 break
 
-        acceptance_rate = acceptance_rate/float(count)
-        return ps,obs_history,rule_history,tmat_history,acceptance_rate
+
+        mc_stats= np.zeros(4)
+        mc_stats[0] = jump_attempts
+        mc_stats[1] = false_acceptance_rate
+        mc_stats[2] = true_acceptance_rate
+        mc_stats[3] = rejection_rate
+        #acceptance_rate = acceptance_rate/float(count)
+        return ps,obs_history,rule_history,tmat_history,mc_stats
             
 
     """
